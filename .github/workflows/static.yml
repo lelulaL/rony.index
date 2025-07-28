@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rony Scripts</title>
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React e Babel via CDN -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Firebase SDKs via CDN (Versão Compatibilidade Atualizada) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <!-- Estilos personalizados e animações -->
+    <style>
+        body {
+            background-color: #111827; /* bg-gray-900 */
+            color: #f9fafb; /* text-gray-50 */
+            font-family: sans-serif;
+        }
+        /* Animação para o selo de status */
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+        }
+        .animate-pulse-green {
+            animation: pulse-green 2s infinite;
+        }
+        .aspect-w-16 { position: relative; padding-bottom: 56.25%; }
+        .aspect-h-9 { height: 0; }
+        .aspect-w-16 > iframe, .aspect-h-9 > iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Onde a aplicação React será renderizada -->
+    <div id="root">
+        <!-- Mensagem de carregamento inicial -->
+        <div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-size: 1.25rem; color: white; font-family: sans-serif;">
+            Carregando Rony Scripts...
+        </div>
+    </div>
+
+    <!-- Todo o código da aplicação React -->
+    <script type="text/babel" data-presets="react">
+        // --- CONFIGURAÇÃO DO FIREBASE (FORNECIDA POR VOCÊ) ---
+        // IMPORTANTE: As chaves do Firebase devem estar aqui para o site funcionar.
+        const firebaseConfig = {
+          apiKey: "AIzaSyCg4Ls2_Pne8pEeKScs6CxQexEix7kASe0",
+          authDomain: "ronysc-c34b3.firebaseapp.com",
+          projectId: "ronysc-c34b3",
+          storageBucket: "ronysc-c34b3.firebasestorage.app",
+          messagingSenderId: "320295290031",
+          appId: "1:320295290031:web:95b8a804412c7d44aec05a"
+        };
+
+        // --- INICIALIZAÇÃO DOS SERVIÇOS FIREBASE ---
+        let auth, db;
+        let isFirebaseInitialized = false;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+            isFirebaseInitialized = true;
+        } catch (e) {
+            console.error("ERRO CRÍTICO: Não foi possível inicializar o Firebase. Verifique o objeto firebaseConfig.", e);
+            const rootDiv = document.getElementById('root');
+            rootDiv.innerHTML = `
+                <div style="padding: 40px; text-align: center; color: red;">
+                    <h1>Erro de Conexão</h1>
+                    <p>Não foi possível conectar ao banco de dados. Verifique as configurações do Firebase no código e sua conexão com a internet.</p>
+                </div>
+            `;
+        }
+
+
+        // --- ÍCONES (Componentes React) ---
+        const PcIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>;
+        const AndroidIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>;
+        const IosIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>;
+        const YoutubeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>;
+        const DiscordIcon = () => <svg role="img" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4464.8254-.6182 1.2525a17.7363 17.7363 0 00-4.9852 0 18.2202 18.2202 0 00-.6182-1.2525.0741.0741 0 00-.0785-.0371A19.7913 19.7913 0 003.683 4.3698a.0741.0741 0 00-.0371.0785C3.7243 9.0438 4.9643 13.115 8.4341 15.776a.0741.0741 0 00.0863-.0078 14.536 14.536 0 001.2482-.9395.0741.0741 0 00-.0216-.1112 12.1812 12.1812 0 01-1.8808-2.1482.0741.0741 0 01.0078-.094c.094-.0627.1958-.1254.2977-.1881a.0741.0741 0 01.094.0078c.4688.3753.9189.7662 1.3397 1.1728a.0741.0741 0 00.0863 0c.4208-.4066.8709-.7975 1.3397-1.1728a.0741.0741 0 01.094-.0078c.1018.0627.2037.1254.2977.1881a.0741.0741 0 01.0078.094 12.1812 12.1812 0 01-1.8808 2.1482.0741.0741 0 00-.0216.1112 14.536 14.536 0 001.2482.9395.0741.0741 0 00.0863.0078c3.4698-2.661 4.7098-6.7322 4.7882-11.3277a.0741.0741 0 00-.0371-.0785zM12.0001 13.417c-1.2188 0-2.2032-1.0625-2.2032-2.3713 0-1.3088 1.0032-2.3713 2.2032-2.3713s2.2032 1.0625 2.2032 2.3713c0 1.3088-.9844 2.3713-2.2032 2.3713zm4.0313-2.3713c0 1.3088-.9844 2.3713-2.2032 2.3713s-2.2032-1.0625-2.2032-2.3713c0-1.3088.9844-2.3713 2.2032-2.3713s2.2032 1.0625 2.2032 2.3713z"/></svg>;
+
+        // --- COMPONENTES DE UI ---
+        const { useState, useEffect } = React;
+
+        const Header = ({ setRoute, siteSettings, games }) => (
+          <header className="bg-gray-900/80 backdrop-blur-sm text-white sticky top-0 z-50 shadow-lg shadow-purple-500/10">
+            <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
+              <div className="text-2xl font-bold text-white cursor-pointer" onClick={() => setRoute({ page: 'home' })}>
+                {siteSettings.siteName || "Rony Scripts"}
+              </div>
+              <div className="hidden md:flex items-center space-x-6">
+                <a onClick={() => setRoute({ page: 'home' })} className="hover:text-purple-400 transition-colors cursor-pointer">Início</a>
+                <a onClick={() => setRoute({ page: 'executors' })} className="hover:text-purple-400 transition-colors cursor-pointer">Executores</a>
+                <div className="relative group">
+                  <button className="hover:text-purple-400 transition-colors">Scripts por Jogo</button>
+                  <div className="absolute left-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 invisible group-hover:visible">
+                    {games.map(game => (
+                      <a key={game.id} onClick={() => setRoute({ page: 'game', slug: game.slug })} className="block px-4 py-2 text-sm text-gray-300 hover:bg-purple-600 hover:text-white cursor-pointer">{game.name}</a>
+                    ))}
+                  </div>
+                </div>
+                <a onClick={() => setRoute({ page: 'how-to-use' })} className="hover:text-purple-400 transition-colors cursor-pointer">Como Usar</a>
+                <a onClick={() => setRoute({ page: 'partners' })} className="hover:text-purple-400 transition-colors cursor-pointer">Parcerias</a>
+              </div>
+              <div className="flex items-center space-x-4">
+                {siteSettings.socialLinks?.map(link => (
+                    <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition-colors">
+                        {link.name.toLowerCase() === 'youtube' && <YoutubeIcon />}
+                        {link.name.toLowerCase() === 'discord' && <DiscordIcon />}
+                    </a>
+                ))}
+              </div>
+            </nav>
+          </header>
+        );
+
+        const Footer = ({ siteSettings }) => (
+          <footer className="bg-gray-900 text-white mt-12">
+            <div className="container mx-auto px-6 py-4 text-center text-gray-400">
+              <p>&copy; {new Date().getFullYear()} {siteSettings.siteName || "Rony Scripts"}. Todos os direitos reservados.</p>
+              <p className="text-xs mt-2">Este site não é afiliado ao Roblox Corporation.</p>
+            </div>
+          </footer>
+        );
+
+        const StatusBadge = ({ status }) => {
+            const isUpdated = status === 'Atualizado';
+            const baseClasses = "px-3 py-1 text-xs font-bold rounded-full text-white shadow-md transition-all duration-300";
+            const updatedClasses = "bg-green-500 group-hover:bg-green-400 group-hover:shadow-green-500/50";
+            const outdatedClasses = "bg-red-500 group-hover:bg-red-400 group-hover:shadow-red-500/50";
+            
+            return (
+                <div className={`absolute top-3 right-3 ${baseClasses} ${isUpdated ? updatedClasses : outdatedClasses} ${isUpdated ? 'animate-pulse-green' : ''}`}>
+                    {status}
+                </div>
+            );
+        };
+
+        const PlatformIcons = ({ platforms }) => (
+            <div className="flex space-x-2 text-gray-400">
+                {platforms.includes('PC') && <div title="PC"><PcIcon /></div>}
+                {platforms.includes('Android') && <div title="Android"><AndroidIcon /></div>}
+                {platforms.includes('iOS') && <div title="iOS"><IosIcon /></div>}
+            </div>
+        );
+
+        const ItemCard = ({ item, setRoute }) => {
+            const handleDownloadClick = () => {
+                const itemRef = db.collection("items").doc(item.id);
+                itemRef.update({
+                    clickCount: firebase.firestore.FieldValue.increment(1)
+                });
+                window.open(item.externalUrl, '_blank');
+            };
+
+            return (
+                <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-purple-500/40 transition-shadow duration-300 group relative transform hover:-translate-y-1">
+                    <div className="relative cursor-pointer" onClick={() => setRoute({ page: 'item', slug: item.slug })}>
+                        <img src={item.imageUrl} alt={item.title} className="w-full h-48 object-cover" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/600x400/1f2937/7c3aed?text=Imagem+Indisponível'; }}/>
+                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all"></div>
+                        <StatusBadge status={item.status} />
+                    </div>
+                    <div className="p-4">
+                        <h3 className="text-lg font-bold text-white mb-2 truncate cursor-pointer" onClick={() => setRoute({ page: 'item', slug: item.slug })}>{item.title}</h3>
+                        <p className="text-sm text-gray-400 mb-4">{item.type === 'script' ? `Jogo: ${item.game}` : 'Executor'}</p>
+                        <div className="flex justify-between items-center">
+                            <PlatformIcons platforms={item.platforms} />
+                            <button onClick={handleDownloadClick} className="bg-purple-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-purple-700 transition-colors">
+                                Obter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- PÁGINAS PÚBLICAS ---
+
+        const HomePage = ({ setRoute }) => {
+            const [executors, setExecutors] = useState([]);
+            const [scripts, setScripts] = useState([]);
+            
+            useEffect(() => {
+                const fetchItems = async () => {
+                    // FIX: Firestore index error fix
+                    // Fetch executors without ordering in the query
+                    const execQuery = db.collection("items").where("type", "==", "executor");
+                    const execSnap = await execQuery.get();
+                    const allExecutors = execSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    // Sort in JavaScript and take the first 4
+                    allExecutors.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
+                    setExecutors(allExecutors.slice(0, 4));
+
+                    // FIX: Firestore index error fix for popular scripts
+                    const scriptQuery = db.collection("items").where("type", "==", "script");
+                    const scriptSnap = await scriptQuery.get();
+                    const allScripts = scriptSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    // Sort by clickCount in JavaScript
+                    allScripts.sort((a, b) => (b.clickCount || 0) - (a.clickCount || 0));
+                    setScripts(allScripts.slice(0, 8));
+                };
+                fetchItems();
+            }, []);
+
+            return (
+                <div className="container mx-auto px-6 py-8">
+                    <section>
+                        <h2 className="text-3xl font-bold text-white mb-6 border-l-4 border-purple-500 pl-4">Executores em Destaque</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {executors.map(item => <ItemCard key={item.id} item={item} setRoute={setRoute} />)}
+                        </div>
+                    </section>
+                    <section className="mt-12">
+                        <h2 className="text-3xl font-bold text-white mb-6 border-l-4 border-purple-500 pl-4">Scripts Populares</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            {scripts.map(item => <ItemCard key={item.id} item={item} setRoute={setRoute} />)}
+                        </div>
+                    </section>
+                </div>
+            );
+        };
+
+        const ExecutorsPage = ({ setRoute }) => {
+            const [items, setItems] = useState([]);
+            useEffect(() => {
+                const fetchItems = async () => {
+                    // FIX: Firestore index error fix
+                    // Fetch all executors and sort them in JavaScript
+                    const q = db.collection("items").where("type", "==", "executor");
+                    const querySnapshot = await q.get();
+                    const allItems = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    allItems.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
+                    setItems(allItems);
+                };
+                fetchItems();
+            }, []);
+
+            return (
+                <div className="container mx-auto px-6 py-8">
+                    <h1 className="text-4xl font-bold text-white mb-8">Todos os Executores</h1>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {items.map(item => <ItemCard key={item.id} item={item} setRoute={setRoute} />)}
+                    </div>
+                </div>
+            );
+        };
+
+        const GamePage = ({ slug, setRoute }) => {
+            const [items, setItems] = useState([]);
+            const [gameName, setGameName] = useState('');
+
+            useEffect(() => {
+                const fetchItems = async () => {
+                    const gamesQuery = db.collection("games").where("slug", "==", slug);
+                    const gamesSnapshot = await gamesQuery.get();
+                    if (!gamesSnapshot.empty) {
+                        const gameData = gamesSnapshot.docs[0].data();
+                        setGameName(gameData.name);
+
+                        // FIX: Firestore index error fix
+                        // Fetch scripts for the game and sort them in JavaScript
+                        const itemsQuery = db.collection("items").where("type", "==", "script").where("game", "==", gameData.name);
+                        const itemsSnapshot = await itemsQuery.get();
+                        const allItems = itemsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        allItems.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
+                        setItems(allItems);
+                    }
+                };
+                fetchItems();
+            }, [slug]);
+
+            return (
+                <div className="container mx-auto px-6 py-8">
+                    <h1 className="text-4xl font-bold text-white mb-8">Scripts para {gameName}</h1>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {items.map(item => <ItemCard key={item.id} item={item} setRoute={setRoute} />)}
+                    </div>
+                </div>
+            );
+        };
+
+        const ItemPage = ({ slug }) => {
+            const [item, setItem] = useState(null);
+
+            useEffect(() => {
+                const fetchItem = async () => {
+                    const q = db.collection("items").where("slug", "==", slug).limit(1);
+                    const querySnapshot = await q.get();
+                    if (!querySnapshot.empty) {
+                        setItem({ id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() });
+                    }
+                };
+                fetchItem();
+            }, [slug]);
+
+            const handleDownloadClick = () => {
+                if (!item) return;
+                const itemRef = db.collection("items").doc(item.id);
+                itemRef.update({
+                    clickCount: firebase.firestore.FieldValue.increment(1)
+                });
+                window.open(item.externalUrl, '_blank');
+            };
+
+            if (!item) return <div className="text-white text-center py-20">Carregando...</div>;
+
+            const getYoutubeEmbedUrl = (url) => {
+                if (!url) return null;
+                const videoIdMatch = url.match(/(?:v=|\/embed\/|\.be\/)([\w-]{11})/);
+                return videoIdMatch ? `https://www.youtube.com/embed/${videoIdMatch[1]}` : null;
+            };
+
+            return (
+                <div className="container mx-auto px-6 py-8">
+                    <div className="bg-gray-800 rounded-lg shadow-xl p-6 md:p-8">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div className="md:col-span-1">
+                                <img src={item.imageUrl} alt={item.title} className="w-full rounded-lg shadow-lg" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/600x400/1f2937/7c3aed?text=Imagem+Indisponível'; }}/>
+                            </div>
+                            <div className="md:col-span-2">
+                                <h1 className="text-4xl font-bold text-white mb-4">{item.title}</h1>
+                                <div className="flex items-center space-x-4 mb-4">
+                                    <StatusBadge status={item.status} />
+                                    <PlatformIcons platforms={item.platforms} />
+                                </div>
+                                <p className="text-gray-300 mb-6">{item.description}</p>
+                                <button onClick={handleDownloadClick} className="w-full bg-purple-600 text-white px-6 py-3 rounded-md font-bold text-lg hover:bg-purple-700 transition-colors">
+                                    OBTER SCRIPT/EXECUTOR
+                                </button>
+                            </div>
+                        </div>
+                        {item.youtubeUrl && getYoutubeEmbedUrl(item.youtubeUrl) && (
+                            <div className="mt-12">
+                                <h2 className="text-2xl font-bold text-white mb-4">Vídeo de Demonstração</h2>
+                                <div className="aspect-w-16 aspect-h-9">
+                                    <iframe 
+                                        src={getYoutubeEmbedUrl(item.youtubeUrl)} 
+                                        frameBorder="0" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                        allowFullScreen
+                                        className="w-full h-full rounded-lg"
+                                    ></iframe>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const HowToUsePage = () => {
+            const [pageData, setPageData] = useState(null);
+
+            useEffect(() => {
+                const fetchPage = async () => {
+                    const docRef = db.collection("pages").doc("how-to-use");
+                    const docSnap = await docRef.get();
+                    if (docSnap.exists) {
+                        setPageData(docSnap.data());
+                    }
+                };
+                fetchPage();
+            }, []);
+            
+            const getYoutubeEmbedUrl = (url) => {
+                if (!url) return null;
+                const videoIdMatch = url.match(/(?:v=|\/embed\/|\.be\/)([\w-]{11})/);
+                return videoIdMatch ? `https://www.youtube.com/embed/${videoIdMatch[1]}` : null;
+            };
+
+            return (
+                <div className="container mx-auto px-6 py-8 text-white">
+                    <h1 className="text-4xl font-bold mb-8">Como Usar Scripts</h1>
+                    {pageData ? (
+                        <div className="bg-gray-800 p-8 rounded-lg">
+                            <h2 className="text-3xl font-bold mb-4">{pageData.title}</h2>
+                            <div className="prose prose-invert max-w-none text-gray-300" dangerouslySetInnerHTML={{ __html: pageData.description }}></div>
+                            {pageData.youtubeUrl && getYoutubeEmbedUrl(pageData.youtubeUrl) && (
+                                <div className="mt-8 aspect-w-16 aspect-h-9">
+                                    <iframe 
+                                        src={getYoutubeEmbedUrl(pageData.youtubeUrl)} 
+                                        frameBorder="0" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                        allowFullScreen
+                                        className="w-full h-full rounded-lg"
+                                    ></iframe>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <p>Conteúdo ainda não adicionado. Volte em breve!</p>
+                    )}
+                </div>
+            );
+        };
+
+        const PartnersPage = () => {
+            const [partners, setPartners] = useState([]);
+
+            useEffect(() => {
+                const fetchPartners = async () => {
+                    const q = db.collection("partners").orderBy("name");
+                    const querySnapshot = await q.get();
+                    setPartners(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                };
+                fetchPartners();
+            }, []);
+
+            return (
+                <div className="container mx-auto px-6 py-8 text-white">
+                    <h1 className="text-4xl font-bold mb-8">Nossos Parceiros</h1>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {partners.map(partner => (
+                            <a key={partner.id} href={partner.url} target="_blank" rel="noopener noreferrer" className="block bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-purple-500/40 transition-shadow duration-300 transform hover:-translate-y-1">
+                                <img src={partner.imageUrl} alt={partner.name} className="h-24 mx-auto mb-4 object-contain" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/300x150/1f2937/7c3aed?text=Logo'; }}/>
+                                <h3 className="text-xl font-bold text-center text-white">{partner.name}</h3>
+                                <p className="text-gray-400 text-center mt-2">{partner.description}</p>
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- PAINEL DE ADMINISTRAÇÃO ---
+
+        const AdminLogin = ({ setUser }) => {
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+
+            const handleLogin = async (e) => {
+                e.preventDefault();
+                setError('');
+                try {
+                    await auth.signInWithEmailAndPassword(email, password);
+                } catch (err) {
+                    setError("Falha no login. Verifique suas credenciais.");
+                    console.error(err);
+                }
+            };
+
+            return (
+                <div className="flex items-center justify-center min-h-screen bg-gray-900">
+                    <div className="w-full max-w-md bg-gray-800 p-8 rounded-lg shadow-lg">
+                        <h1 className="text-3xl font-bold text-white text-center mb-6">Admin Login</h1>
+                        <form onSubmit={handleLogin}>
+                            <div className="mb-4">
+                                <label className="block text-gray-300 mb-2" htmlFor="email">Email</label>
+                                <input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" required />
+                            </div>
+                            <div className="mb-6">
+                                <label className="block text-gray-300 mb-2" htmlFor="password">Senha</label>
+                                <input type="password" id="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" required />
+                            </div>
+                            {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+                            <button type="submit" className="w-full bg-purple-600 text-white py-2 rounded-md font-bold hover:bg-purple-700 transition-colors">Entrar</button>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        const AdminLayout = ({ children, setRoute, setUser }) => {
+            const handleLogout = async () => {
+                await auth.signOut();
+                setUser(null);
+                setRoute({ page: 'home' });
+            };
+
+            return (
+                <div className="flex min-h-screen bg-gray-900 text-white">
+                    <aside className="w-64 bg-gray-800 p-4 flex flex-col">
+                        <h2 className="text-2xl font-bold mb-8">Admin</h2>
+                        <nav className="flex flex-col space-y-2">
+                            <a onClick={() => setRoute({ page: 'admin-dashboard' })} className="px-4 py-2 rounded-md hover:bg-purple-600 cursor-pointer">Dashboard</a>
+                            <a onClick={() => setRoute({ page: 'admin-items' })} className="px-4 py-2 rounded-md hover:bg-purple-600 cursor-pointer">Itens (Scripts/Exec)</a>
+                            <a onClick={() => setRoute({ page: 'admin-games' })} className="px-4 py-2 rounded-md hover:bg-purple-600 cursor-pointer">Jogos</a>
+                            <a onClick={() => setRoute({ page: 'admin-partners' })} className="px-4 py-2 rounded-md hover:bg-purple-600 cursor-pointer">Parceiros</a>
+                            <a onClick={() => setRoute({ page: 'admin-how-to-use' })} className="px-4 py-2 rounded-md hover:bg-purple-600 cursor-pointer">Página "Como Usar"</a>
+                            <a onClick={() => setRoute({ page: 'admin-settings' })} className="px-4 py-2 rounded-md hover:bg-purple-600 cursor-pointer">Configurações</a>
+                        </nav>
+                        <button onClick={handleLogout} className="mt-auto w-full bg-red-600 text-white py-2 rounded-md font-bold hover:bg-red-700 transition-colors">Sair</button>
+                    </aside>
+                    <main className="flex-1 p-8 overflow-y-auto">
+                        {children}
+                    </main>
+                </div>
+            );
+        };
+
+        const AdminDashboard = () => {
+            const [stats, setStats] = useState({ items: 0, games: 0, partners: 0, clicks: 0 });
+
+            useEffect(() => {
+                const fetchStats = async () => {
+                    const itemsSnap = await db.collection("items").get();
+                    const gamesSnap = await db.collection("games").get();
+                    const partnersSnap = await db.collection("partners").get();
+                    
+                    let totalClicks = 0;
+                    itemsSnap.forEach(doc => {
+                        totalClicks += doc.data().clickCount || 0;
+                    });
+
+                    setStats({
+                        items: itemsSnap.size,
+                        games: gamesSnap.size,
+                        partners: partnersSnap.size,
+                        clicks: totalClicks
+                    });
+                };
+                fetchStats();
+            }, []);
+
+            return (
+                <div>
+                    <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="bg-gray-800 p-6 rounded-lg"><h3 className="text-lg text-gray-400">Total de Itens</h3><p className="text-4xl font-bold">{stats.items}</p></div>
+                        <div className="bg-gray-800 p-6 rounded-lg"><h3 className="text-lg text-gray-400">Total de Jogos</h3><p className="text-4xl font-bold">{stats.games}</p></div>
+                        <div className="bg-gray-800 p-6 rounded-lg"><h3 className="text-lg text-gray-400">Total de Parceiros</h3><p className="text-4xl font-bold">{stats.partners}</p></div>
+                        <div className="bg-gray-800 p-6 rounded-lg"><h3 className="text-lg text-gray-400">Total de Cliques</h3><p className="text-4xl font-bold">{stats.clicks}</p></div>
+                    </div>
+                </div>
+            );
+        };
+        
+        // --- COMPONENTES CRUD GENÉRICOS ---
+        // Para simplificar, vou criar um componente genérico para gerenciar Jogos e Parceiros
+        const AdminCrudManager = ({ collectionName, title, fields, setRoute }) => {
+            const [items, setItems] = useState([]);
+
+            const fetchData = async () => {
+                const snap = await db.collection(collectionName).orderBy("name").get();
+                setItems(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            };
+
+            useEffect(() => {
+                fetchData();
+            }, []);
+
+            const deleteItem = async (id) => {
+                if (window.confirm(`Tem certeza que deseja deletar este item?`)) {
+                    await db.collection(collectionName).doc(id).delete();
+                    fetchData();
+                }
+            };
+            
+            return (
+                <div>
+                    <div className="flex justify-between items-center mb-8">
+                        <h1 className="text-3xl font-bold">{title}</h1>
+                        <button onClick={() => setRoute({ page: `admin-${collectionName}-form`, id: 'new' })} className="bg-green-600 px-4 py-2 rounded-md hover:bg-green-700">Adicionar Novo</button>
+                    </div>
+                    <div className="bg-gray-800 rounded-lg overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead><tr className="bg-gray-700">{fields.map(f => <th key={f.key} className="p-4">{f.label}</th>)}<th className="p-4">Ações</th></tr></thead>
+                            <tbody>
+                                {items.map(item => (
+                                    <tr key={item.id} className="border-b border-gray-700">
+                                        {fields.map(f => <td key={f.key} className="p-4 truncate" style={{maxWidth: '200px'}}>{item[f.key]}</td>)}
+                                        <td className="p-4 flex space-x-2">
+                                            <button onClick={() => setRoute({ page: `admin-${collectionName}-form`, id: item.id })} className="bg-blue-600 px-3 py-1 rounded-md text-xs hover:bg-blue-700">Editar</button>
+                                            <button onClick={() => deleteItem(item.id)} className="bg-red-600 px-3 py-1 rounded-md text-xs hover:bg-red-700">Deletar</button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        };
+
+        const AdminCrudForm = ({ collectionName, title, fields, id, setRoute }) => {
+            const [formData, setFormData] = useState({});
+            const isNew = id === 'new';
+
+            useEffect(() => {
+                const initialData = {};
+                fields.forEach(f => initialData[f.key] = f.default || '');
+                setFormData(initialData);
+
+                if (!isNew) {
+                    const fetchItem = async () => {
+                        const docRef = db.collection(collectionName).doc(id);
+                        const docSnap = await docRef.get();
+                        if (docSnap.exists) {
+                            setFormData(docSnap.data());
+                        }
+                    };
+                    fetchItem();
+                }
+            }, [id]);
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({ ...prev, [name]: value }));
+            };
+            
+            const generateSlug = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                let dataToSave = {...formData};
+                if(fields.some(f => f.key === 'slug')) {
+                    dataToSave.slug = generateSlug(formData.name);
+                }
+
+                if (isNew) {
+                    await db.collection(collectionName).add(dataToSave);
+                } else {
+                    await db.collection(collectionName).doc(id).set(dataToSave, { merge: true });
+                }
+                setRoute({ page: `admin-${collectionName}` });
+            };
+
+            return (
+                <div>
+                    <h1 className="text-3xl font-bold mb-8">{isNew ? 'Adicionar' : 'Editar'} {title}</h1>
+                    <form onSubmit={handleSubmit} className="space-y-6 bg-gray-800 p-8 rounded-lg">
+                        {fields.map(field => (
+                            <div key={field.key}>
+                                <label className="block mb-2">{field.label}</label>
+                                <input type="text" name={field.key} value={formData[field.key] || ''} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md" required />
+                            </div>
+                        ))}
+                        <div className="flex justify-end space-x-4">
+                            <button type="button" onClick={() => setRoute({ page: `admin-${collectionName}` })} className="bg-gray-600 px-4 py-2 rounded-md hover:bg-gray-700">Cancelar</button>
+                            <button type="submit" className="bg-purple-600 px-4 py-2 rounded-md hover:bg-purple-700">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            );
+        };
+        
+        const AdminItems = ({ setRoute }) => {
+            const [items, setItems] = useState([]);
+
+            const fetchItems = async () => {
+                // FIX: Firestore index error fix
+                const q = db.collection("items");
+                const querySnapshot = await q.get();
+                const allItems = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                allItems.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
+                setItems(allItems);
+            };
+
+            useEffect(() => { fetchItems(); }, []);
+
+            const deleteItem = async (id) => {
+                if (window.confirm("Tem certeza que deseja deletar este item?")) {
+                    await db.collection("items").doc(id).delete();
+                    fetchItems();
+                }
+            };
+
+            return (
+                <div>
+                    <div className="flex justify-between items-center mb-8">
+                        <h1 className="text-3xl font-bold">Gerenciar Itens</h1>
+                        <button onClick={() => setRoute({ page: 'admin-item-form', id: 'new' })} className="bg-green-600 px-4 py-2 rounded-md hover:bg-green-700">Adicionar Novo</button>
+                    </div>
+                    <div className="bg-gray-800 rounded-lg overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead><tr className="bg-gray-700"><th className="p-4">Título</th><th className="p-4">Tipo</th><th className="p-4">Status</th><th className="p-4">Ações</th></tr></thead>
+                            <tbody>
+                                {items.map(item => (
+                                    <tr key={item.id} className="border-b border-gray-700">
+                                        <td className="p-4">{item.title}</td><td className="p-4">{item.type}</td><td className="p-4">{item.status}</td>
+                                        <td className="p-4 flex space-x-2">
+                                            <button onClick={() => setRoute({ page: 'admin-item-form', id: item.id })} className="bg-blue-600 px-3 py-1 rounded-md text-xs hover:bg-blue-700">Editar</button>
+                                            <button onClick={() => deleteItem(item.id)} className="bg-red-600 px-3 py-1 rounded-md text-xs hover:bg-red-700">Deletar</button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        };
+
+        const AdminItemForm = ({ id, setRoute }) => {
+            const [item, setItem] = useState({ type: 'script', title: '', slug: '', game: '', description: '', imageUrl: '', externalUrl: '', youtubeUrl: '', status: 'Atualizado', platforms: [], requiresKey: false });
+            const [games, setGames] = useState([]);
+            const isNew = id === 'new';
+
+            useEffect(() => {
+                const fetchGames = async () => {
+                    const gamesSnap = await db.collection("games").get();
+                    setGames(gamesSnap.docs.map(doc => doc.data().name));
+                };
+                fetchGames();
+
+                if (!isNew) {
+                    const fetchItem = async () => {
+                        const docRef = db.collection("items").doc(id);
+                        const docSnap = await docRef.get();
+                        if (docSnap.exists) {
+                            setItem({ ...docSnap.data(), id: docSnap.id });
+                        }
+                    };
+                    fetchItem();
+                }
+            }, [id]);
+
+            const handleChange = (e) => {
+                const { name, value, type, checked } = e.target;
+                if (name === "platforms") {
+                    const newPlatforms = checked ? [...item.platforms, value] : item.platforms.filter(p => p !== value);
+                    setItem(prev => ({ ...prev, platforms: newPlatforms }));
+                } else if (type === 'checkbox') {
+                    setItem(prev => ({ ...prev, [name]: checked }));
+                } else {
+                    setItem(prev => ({ ...prev, [name]: value }));
+                }
+            };
+            
+            const generateSlug = (title) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                const dataToSave = {
+                    ...item,
+                    slug: generateSlug(item.title),
+                    lastCheckedAt: new Date(),
+                };
+
+                if (isNew) {
+                    dataToSave.createdAt = new Date();
+                    dataToSave.clickCount = 0;
+                    await db.collection("items").add(dataToSave);
+                } else {
+                    const docRef = db.collection("items").doc(id);
+                    await docRef.set(dataToSave, { merge: true });
+                }
+                setRoute({ page: 'admin-items' });
+            };
+
+            return (
+                <div>
+                    <h1 className="text-3xl font-bold mb-8">{isNew ? 'Adicionar Novo Item' : 'Editar Item'}</h1>
+                    <form onSubmit={handleSubmit} className="space-y-6 bg-gray-800 p-8 rounded-lg">
+                        <div><label className="block mb-2">Tipo</label><select name="type" value={item.type} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md"><option value="script">Script</option><option value="executor">Executor</option></select></div>
+                        <div><label className="block mb-2">Título</label><input type="text" name="title" value={item.title} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md" required /></div>
+                        {item.type === 'script' && (<div><label className="block mb-2">Jogo</label><select name="game" value={item.game} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md"><option value="">Selecione um jogo</option>{games.map(g => <option key={g} value={g}>{g}</option>)}</select></div>)}
+                        <div><label className="block mb-2">Descrição</label><textarea name="description" value={item.description} onChange={handleChange} rows="4" className="w-full p-2 bg-gray-700 rounded-md"></textarea></div>
+                        <div><label className="block mb-2">URL da Imagem</label><input type="text" name="imageUrl" value={item.imageUrl} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md" placeholder="https://exemplo.com/imagem.png" required /></div>
+                        <div><label className="block mb-2">URL Externa (Download)</label><input type="text" name="externalUrl" value={item.externalUrl} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md" required /></div>
+                        <div><label className="block mb-2">URL do Vídeo (YouTube)</label><input type="text" name="youtubeUrl" value={item.youtubeUrl} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md" /></div>
+                        <div><label className="block mb-2">Status</label><select name="status" value={item.status} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md"><option value="Atualizado">Atualizado</option><option value="Desatualizado">Desatualizado</option></select></div>
+                        <div><label className="block mb-2">Plataformas</label><div className="flex space-x-4"><label><input type="checkbox" name="platforms" value="PC" checked={item.platforms?.includes('PC')} onChange={handleChange} /> PC</label><label><input type="checkbox" name="platforms" value="Android" checked={item.platforms?.includes('Android')} onChange={handleChange} /> Android</label><label><input type="checkbox" name="platforms" value="iOS" checked={item.platforms?.includes('iOS')} onChange={handleChange} /> iOS</label></div></div>
+                        <div><label className="block mb-2"><input type="checkbox" name="requiresKey" checked={item.requiresKey} onChange={handleChange} className="mr-2" />Requer Key</label></div>
+                        <div className="flex justify-end space-x-4"><button type="button" onClick={() => setRoute({ page: 'admin-items' })} className="bg-gray-600 px-4 py-2 rounded-md hover:bg-gray-700">Cancelar</button><button type="submit" className="bg-purple-600 px-4 py-2 rounded-md hover:bg-purple-700">Salvar</button></div>
+                    </form>
+                </div>
+            );
+        };
+        
+        const AdminSettings = ({ setRoute }) => {
+            const [settings, setSettings] = useState({ siteName: '', socialLinks: [] });
+
+            useEffect(() => {
+                const fetchSettings = async () => {
+                    const docRef = db.collection("siteSettings").doc("config");
+                    const docSnap = await docRef.get();
+                    if (docSnap.exists) {
+                        setSettings(docSnap.data());
+                    }
+                };
+                fetchSettings();
+            }, []);
+
+            const handleLinkChange = (index, field, value) => {
+                const newLinks = [...settings.socialLinks];
+                newLinks[index][field] = value;
+                setSettings(prev => ({ ...prev, socialLinks: newLinks }));
+            };
+
+            const addLink = () => {
+                setSettings(prev => ({ ...prev, socialLinks: [...prev.socialLinks, { name: '', url: '' }] }));
+            };
+
+            const removeLink = (index) => {
+                const newLinks = settings.socialLinks.filter((_, i) => i !== index);
+                setSettings(prev => ({ ...prev, socialLinks: newLinks }));
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                await db.collection("siteSettings").doc("config").set(settings, { merge: true });
+                alert('Configurações salvas!');
+                setRoute({ page: 'admin-dashboard' });
+            };
+
+            return (
+                <div>
+                    <h1 className="text-3xl font-bold mb-8">Configurações do Site</h1>
+                    <form onSubmit={handleSubmit} className="space-y-6 bg-gray-800 p-8 rounded-lg">
+                        <div>
+                            <label className="block mb-2">Nome do Site</label>
+                            <input type="text" value={settings.siteName} onChange={e => setSettings(prev => ({ ...prev, siteName: e.target.value }))} className="w-full p-2 bg-gray-700 rounded-md" />
+                        </div>
+                        <div>
+                            <label className="block mb-2">Links Sociais</label>
+                            {settings.socialLinks?.map((link, index) => (
+                                <div key={index} className="flex items-center space-x-2 mb-2">
+                                    <input type="text" placeholder="Nome (ex: YouTube)" value={link.name} onChange={e => handleLinkChange(index, 'name', e.target.value)} className="w-1/3 p-2 bg-gray-700 rounded-md" />
+                                    <input type="text" placeholder="URL" value={link.url} onChange={e => handleLinkChange(index, 'url', e.target.value)} className="w-2/3 p-2 bg-gray-700 rounded-md" />
+                                    <button type="button" onClick={() => removeLink(index)} className="bg-red-600 p-2 rounded-md">X</button>
+                                </div>
+                            ))}
+                            <button type="button" onClick={addLink} className="bg-green-600 px-4 py-2 rounded-md mt-2">Adicionar Link</button>
+                        </div>
+                        <div className="flex justify-end"><button type="submit" className="bg-purple-600 px-4 py-2 rounded-md hover:bg-purple-700">Salvar Configurações</button></div>
+                    </form>
+                </div>
+            );
+        };
+        
+        const AdminHowToUseForm = ({ setRoute }) => {
+            const [pageData, setPageData] = useState({ title: '', description: '', youtubeUrl: '' });
+
+            useEffect(() => {
+                const fetchPage = async () => {
+                    const docRef = db.collection("pages").doc("how-to-use");
+                    const docSnap = await docRef.get();
+                    if (docSnap.exists) {
+                        setPageData(docSnap.data());
+                    }
+                };
+                fetchPage();
+            }, []);
+            
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setPageData(prev => ({...prev, [name]: value}));
+            };
+            
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                await db.collection("pages").doc("how-to-use").set(pageData, { merge: true });
+                alert('Página salva!');
+                setRoute({ page: 'admin-dashboard' });
+            };
+            
+            return (
+                <div>
+                    <h1 className="text-3xl font-bold mb-8">Editar Página "Como Usar"</h1>
+                    <form onSubmit={handleSubmit} className="space-y-6 bg-gray-800 p-8 rounded-lg">
+                        <div><label className="block mb-2">Título</label><input type="text" name="title" value={pageData.title} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md" /></div>
+                        <div><label className="block mb-2">Descrição (pode usar tags HTML como `&lt;strong&gt;` e `&lt;br /&gt;`)</label><textarea name="description" value={pageData.description} onChange={handleChange} rows="6" className="w-full p-2 bg-gray-700 rounded-md"></textarea></div>
+                        <div><label className="block mb-2">URL do Vídeo (YouTube)</label><input type="text" name="youtubeUrl" value={pageData.youtubeUrl} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md" /></div>
+                        <div className="flex justify-end"><button type="submit" className="bg-purple-600 px-4 py-2 rounded-md hover:bg-purple-700">Salvar Página</button></div>
+                    </form>
+                </div>
+            );
+        };
+
+        // --- COMPONENTE PRINCIPAL E ROTEAMENTO ---
+
+        function App() {
+            const [route, setRoute] = useState({ page: 'home' });
+            const [user, setUser] = useState(null);
+            const [loadingAuth, setLoadingAuth] = useState(true);
+            const [siteSettings, setSiteSettings] = useState({});
+            const [games, setGames] = useState([]);
+
+            useEffect(() => {
+                if (!auth) return; // Garante que o firebase está inicializado
+                const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+                    setUser(currentUser);
+                    setLoadingAuth(false);
+                });
+                return () => unsubscribe();
+            }, []);
+
+            useEffect(() => {
+                if (!db) return; // Garante que o firebase está inicializado
+                const fetchInitialData = async () => {
+                    const settingsRef = db.collection("siteSettings").doc("config");
+                    const settingsSnap = await settingsRef.get();
+                    if (settingsSnap.exists) {
+                        setSiteSettings(settingsSnap.data());
+                    } else {
+                        setSiteSettings({ siteName: "Rony Scripts", socialLinks: [] });
+                    }
+
+                    const gamesQuery = db.collection("games").orderBy("name");
+                    const gamesSnap = await gamesQuery.get();
+                    setGames(gamesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                };
+                fetchInitialData();
+            }, [route]); // Re-fetch on route change to keep nav updated
+
+            const renderPage = () => {
+                if (!auth || !db) {
+                     return <div style="color: red; text-align: center; padding-top: 50px;">Aguardando inicialização do Firebase...</div>;
+                }
+                // Rota de Admin Login
+                if (window.location.hash === '#/admin' && !user) {
+                    if (loadingAuth) return <div className="text-white text-center py-20">Verificando autenticação...</div>;
+                    return <AdminLogin setUser={setUser} />;
+                }
+
+                // Rotas de Admin
+                if (window.location.hash.startsWith('#/admin') && user) {
+                    const adminPage = route.page.split('admin-')[1] || 'dashboard';
+                    
+                    return (
+                        <AdminLayout setRoute={setRoute} setUser={setUser}>
+                            {adminPage === 'dashboard' && <AdminDashboard />}
+                            {adminPage === 'items' && <AdminItems setRoute={setRoute} />}
+                            {adminPage === 'item-form' && <AdminItemForm id={route.id} setRoute={setRoute} />}
+                            {adminPage === 'games' && <AdminCrudManager collectionName="games" title="Gerenciar Jogos" fields={[{key: 'name', label: 'Nome'}]} setRoute={setRoute} />}
+                            {adminPage === 'games-form' && <AdminCrudForm collectionName="games" title="Jogo" fields={[{key: 'name', label: 'Nome'}]} id={route.id} setRoute={setRoute} />}
+                            {adminPage === 'partners' && <AdminCrudManager collectionName="partners" title="Gerenciar Parceiros" fields={[{key: 'name', label: 'Nome'}, {key: 'url', label: 'URL'}]} setRoute={setRoute} />}
+                            {adminPage === 'partners-form' && <AdminCrudForm collectionName="partners" title="Parceiro" fields={[{key: 'name', label: 'Nome'}, {key: 'description', label: 'Descrição'}, {key: 'imageUrl', label: 'URL da Imagem'}, {key: 'url', label: 'URL do Parceiro'}]} id={route.id} setRoute={setRoute} />}
+                            {adminPage === 'how-to-use' && <AdminHowToUseForm setRoute={setRoute} />}
+                            {adminPage === 'settings' && <AdminSettings setRoute={setRoute} />}
+                        </AdminLayout>
+                    );
+                }
+
+                // Rotas Públicas
+                return (
+                    <>
+                        <Header setRoute={setRoute} siteSettings={siteSettings} games={games} />
+                        <main>
+                            {route.page === 'home' && <HomePage setRoute={setRoute} />}
+                            {route.page === 'executors' && <ExecutorsPage setRoute={setRoute} />}
+                            {route.page === 'game' && <GamePage slug={route.slug} setRoute={setRoute} />}
+                            {route.page === 'item' && <ItemPage slug={route.slug} />}
+                            {route.page === 'how-to-use' && <HowToUsePage />}
+                            {route.page === 'partners' && <PartnersPage />}
+                        </main>
+                        <Footer siteSettings={siteSettings} />
+                    </>
+                );
+            };
+            
+            // Roteamento simples baseado em hash
+            useEffect(() => {
+                const handleHashChange = () => {
+                    const hash = window.location.hash.replace('#/', '');
+                    const [page, slug] = hash.split('/');
+                    
+                    if (page === 'admin') {
+                        setRoute({ page: `admin-${slug || 'dashboard'}` });
+                    } else if (page === 'game') {
+                        setRoute({ page: 'game', slug });
+                    } else if (page === 'item') {
+                        setRoute({ page: 'item', slug });
+                    } else if (['executors', 'how-to-use', 'partners'].includes(page)) {
+                        setRoute({ page });
+                    } else {
+                        setRoute({ page: 'home' });
+                    }
+                };
+
+                window.addEventListener('hashchange', handleHashChange);
+                handleHashChange(); // Initial route
+                
+                return () => window.removeEventListener('hashchange', handleHashChange);
+            }, []);
+
+
+            return (
+                <div className="bg-gray-900 min-h-screen text-white font-sans">
+                    {renderPage()}
+                </div>
+            );
+        }
+        
+        // CORREÇÃO FINAL: Garante que o React só vai rodar depois que a página inteira carregar.
+        window.onload = function() {
+          if (isFirebaseInitialized) {
+            ReactDOM.render(<App />, document.getElementById('root'));
+          }
+        };
+    </script>
+</body>
+</html>
