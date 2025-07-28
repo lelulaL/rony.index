@@ -3,1016 +3,993 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lures Scripts Premium</title>
+    <title>Rony Scripts</title>
+    
+    <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    
+    <!-- React e Babel via CDN -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Firebase SDKs via CDN (Versão Compatibilidade Atualizada) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <!-- Estilos personalizados e animações -->
     <style>
-        :root { 
-            --accent-color: #3b82f6; 
-            --accent-glow: rgba(59, 130, 246, 0.4);
-            --bg-primary: #010409;
-            --bg-secondary: #0d1117;
-            --bg-tertiary: #161b22;
+        body {
+            background-color: #111827; /* bg-gray-900 */
+            color: #f9fafb; /* text-gray-50 */
+            font-family: sans-serif;
         }
-        
-        @keyframes move-stars { from { background-position: 0 0; } to { background-position: -10000px 5000px; } }
-
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg-primary);
-            color: #c9d1d9; 
-            overflow: hidden; 
+        /* Animação para o selo de status */
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
         }
-        .stars-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background-image: 
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><circle fill="%23161b22" cx="100" cy="100" r="1.2"/></svg>'),
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600"><circle fill="%230d1117" cx="300" cy="300" r="0.8"/></svg>');
-            animation: move-stars 300s linear infinite;
+        .animate-pulse-green {
+            animation: pulse-green 2s infinite;
         }
-        
-        .admin-only, .admin-only-inline { display: none !important; }
-        body.is-admin .admin-only { display: flex !important; }
-        body.is-admin .admin-only-inline { display: inline-flex !important; }
-
-        .fade-in { animation: fadeIn 0.8s ease-in-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        
-        .glow-on-hover:hover { box-shadow: 0 0 20px var(--accent-glow); }
-
-        .sortable-ghost { opacity: 0.4; background-color: rgba(59, 130, 246, 0.2); border: 2px dashed var(--accent-color); }
-        .sortable-chosen { cursor: grabbing; transform: scale(1.02); box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
-        
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #22272e; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #333942; }
-
-        .skeleton { animation: pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-        
-        .nav-item.active { background-color: rgba(59, 130, 246, 0.15); color: white; position: relative; }
-        .nav-item.active::before { content: ''; position: absolute; left: -4px; top: 15%; height: 70%; width: 4px; background-color: var(--accent-color); border-radius: 0 4px 4px 0; box-shadow: 0 0 10px var(--accent-color); }
-        
-        .avatar-option { cursor: pointer; border: 2px solid transparent; transition: all 0.2s ease-in-out; }
-        .avatar-option.selected { border-color: var(--accent-color); box-shadow: 0 0 15px var(--accent-glow); transform: scale(1.1); }
-
-        /* Animações de Login Refinadas */
-        @keyframes gentle-wave {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        .login-title-char {
-            display: inline-block;
-            animation: gentle-wave 2.5s ease-in-out infinite;
-            text-shadow: 0 0 8px var(--accent-glow);
-        }
-
-        .led-panel {
-            background: #000;
-            padding: 8px 0;
-            overflow: hidden;
-            box-shadow: inset 0 0 10px #000;
-            border: 1px solid #222;
-            height: 40px; /* Altura fixa para o painel */
-            position: relative;
-        }
-        .led-word {
+        .aspect-w-16 { position: relative; padding-bottom: 56.25%; }
+        .aspect-h-9 { height: 0; }
+        .aspect-w-16 > iframe, .aspect-h-9 > iframe {
             position: absolute;
-            width: 100%;
+            top: 0;
             left: 0;
-            text-align: center;
-            font-family: monospace;
-            font-size: 1.125rem; /* text-lg */
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
+            width: 100%;
+            height: 100%;
         }
-        .led-word.visible {
-            opacity: 1;
-        }
-
-        @keyframes rotate-rgb { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .rgb-border {
-            position: relative;
-            z-index: 0;
-            overflow: hidden;
-        }
-        .rgb-border::before {
-            content: '';
-            position: absolute;
-            z-index: -1;
-            left: -50%;
-            top: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(from 0deg, #89f7fe, #66a6ff, #a283ff, #ff83b5, #ff8383, #f7d389, #89f7fe);
-            animation: rotate-rgb 4s linear infinite;
-        }
-
-        #main-content { overflow-y: auto; height: 100vh; }
-        .script-card {
-            background-color: var(--bg-tertiary);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .script-card:hover {
-            transform: scale(1.03);
-            z-index: 20;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px var(--accent-glow);
-        }
-        .script-card-img { width: 100%; height: 160px; object-fit: cover; }
     </style>
 </head>
-<body class="antialiased">
-    <div class="stars-bg"></div>
-
-    <!-- Telas Iniciais -->
-    <div id="loading-screen" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[100] p-4">
-        <div class="text-white text-xl animate-pulse">Carregando Plataforma...</div>
-    </div>
-
-    <!-- LOGIN ATUALIZADO -->
-    <div id="login-screen" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[90] p-4">
-        <div class="w-full max-w-md rounded-2xl shadow-2xl shadow-black/50 fade-in rgb-border p-1">
-            <div class="w-full h-full bg-gray-900/95 rounded-xl p-8 text-center">
-                <img src="https://i.ibb.co/Fkdd31VP/download.jpg" onerror="this.onerror=null;this.src='https://placehold.co/256x256/0d1117/3b82f6?text=L&font=inter'" alt="Logo" class="w-24 h-24 mx-auto rounded-full mb-4 border-2 border-blue-500">
-                <h1 id="login-title-container" class="text-3xl font-black text-white mb-4"></h1>
-                <div id="led-panel" class="led-panel rounded-md mb-6"></div>
-                <p class="text-gray-400 mb-6">Insira sua chave de acesso ou a senha de administrador.</p>
-                <form id="login-form" class="space-y-4">
-                    <input type="password" id="access-key" placeholder="Sua Chave ou Senha" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-center transition-all duration-300">
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg shadow-blue-600/30 transition-all duration-300 transform hover:scale-105 glow-on-hover">Entrar</button>
-                </form>
-                <p id="login-error" class="text-red-400 text-sm mt-4 h-5"></p>
-            </div>
+<body>
+    
+    <!-- Onde a aplicação React será renderizada -->
+    <div id="root">
+        <!-- Mensagem de carregamento inicial -->
+        <div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-size: 1.25rem; color: white; font-family: sans-serif;">
+            Carregando Rony Scripts...
         </div>
     </div>
 
-    <!-- Estrutura Principal da Aplicação -->
-    <div id="app-container" class="hidden relative min-h-screen">
-        <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-30 hidden md:hidden"></div>
-        <aside id="main-sidebar" class="fixed inset-y-0 left-0 z-40 w-72 bg-gray-900/95 backdrop-blur-sm border-r border-gray-800 flex flex-col p-4 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
-            <button id="menu-close-btn" class="md:hidden absolute top-2 right-2 text-2xl p-2 text-gray-400 hover:text-white">
-                <i class="fa-solid fa-times"></i>
-            </button>
-            <header class="flex items-center gap-3 mb-4 p-2 cursor-pointer" id="home-btn">
-                <img src="https://i.ibb.co/Fkdd31VP/download.jpg" onerror="this.onerror=null;this.src='https://placehold.co/256x256/0d1117/3b82f6?text=L&font=inter'" alt="Logo" class="w-10 h-10 rounded-full border-2 border-blue-500">
-                <h1 class="text-xl font-bold text-white">Lures Scripts</h1>
-            </header>
-            <div class="relative mb-4 px-1">
-                <input type="search" id="global-search-bar" placeholder="Pesquisar..." class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 pl-9 pr-3 text-sm focus:ring-1 focus:ring-blue-500 outline-none transition-all">
-                <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
-            </div>
-            <nav id="main-nav" class="flex-grow overflow-y-auto space-y-2 pr-2"></nav>
-            <div id="admin-panel" class="admin-only mt-auto pt-4 border-t border-gray-800 space-y-2"></div>
-            <div id="user-panel" class="mt-4 pt-4 border-t border-gray-800 flex items-center justify-between gap-2"></div>
-        </aside>
-        <main id="main-content" class="w-full md:ml-72 p-6 sm:p-8">
-             <header class="md:hidden flex items-center justify-between mb-6">
-                <button id="menu-toggle-btn" class="text-2xl p-2 text-gray-300">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-                <h1 class="text-xl font-bold text-white">Lures Scripts</h1>
-                <div class="w-8"></div> <!-- Spacer -->
-            </header>
-            <div id="content-wrapper"></div>
-        </main>
-    </div>
-    
-    <!-- Modais -->
-    <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50 hidden"><div class="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-6 w-full max-w-lg max-h-[90vh] flex flex-col"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold">Meu Perfil</h3><button class="cancel-modal-btn text-gray-400 hover:text-white text-2xl">&times;</button></div><div class="flex-grow overflow-y-auto pr-2"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="md:col-span-1"><h4 class="text-lg font-semibold mb-4">Gerenciar Perfil</h4><form id="profile-form" class="space-y-4"><img id="profile-avatar-preview" src="" class="w-24 h-24 rounded-full mx-auto mb-4 border-2 border-blue-500"><div><label for="profile-nickname" class="block text-sm font-medium text-gray-300 mb-1">Apelido</label><input type="text" id="profile-nickname" placeholder="Seu apelido único" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"></div><button type="submit" class="w-full bg-green-600 hover:bg-green-500 text-white font-semibold py-2 rounded-lg">Salvar Perfil</button></form></div><div class="md:col-span-1"><h4 class="text-lg font-semibold mb-4">Escolha seu Avatar</h4><div id="avatar-gallery" class="grid grid-cols-4 gap-3 bg-black/20 p-3 rounded-md"></div></div></div></div></div></div>
-    <div id="key-manager-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 hidden"><div class="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] flex flex-col"><div class="flex justify-between items-center mb-4"><h3 class="text-2xl font-bold">Gerenciador de Chaves</h3><button class="cancel-modal-btn text-gray-400 hover:text-white text-2xl">&times;</button></div><form id="generate-key-form" class="flex gap-2 mb-4"><input type="text" id="key-id-name" placeholder="Nome de Identificação (Ex: Luan Neves)" class="flex-grow bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white" required><button type="submit" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105">Gerar Nova Chave</button></form><div id="key-list" class="overflow-y-auto space-y-2 pr-2 bg-black/20 p-2 rounded-md"></div></div></div>
-    <div id="game-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 hidden"><div class="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-8 w-full max-w-md"><h3 class="text-2xl font-bold mb-6" id="game-modal-title"></h3><form id="game-form"><input type="hidden" id="game-id"><label for="game-name" class="block text-sm font-medium text-gray-300 mb-2">Nome do Jogo</label><input type="text" id="game-name" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white" required><div class="flex justify-end gap-4 mt-8"><button type="button" class="cancel-modal-btn px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700">Cancelar</button><button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">Salvar</button></div></form></div></div>
-    <div id="script-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 hidden"><div class="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-8 w-full max-w-2xl max-h-[95vh] flex flex-col"><h3 class="text-2xl font-bold mb-6" id="script-modal-title"></h3><form id="script-form" class="space-y-4 overflow-y-auto pr-2"><input type="hidden" id="script-id"><input type="hidden" id="script-game-id"><div><label for="script-title" class="block text-sm font-medium">Título</label><input type="text" id="script-title" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white" required></div><div><label for="script-image-url" class="block text-sm font-medium">URL da Imagem</label><input type="url" id="script-image-url" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"></div><div><label for="script-description" class="block text-sm font-medium">Descrição</label><textarea id="script-description" rows="2" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"></textarea></div><div><label for="script-code" class="block text-sm font-medium">Código</label><textarea id="script-code" rows="5" class="w-full bg-black/50 border border-gray-700 rounded-lg p-3 text-white font-mono text-sm"></textarea></div><div class="flex gap-4"><div class="flex-1"><label for="script-status" class="block text-sm font-medium">Status</label><select id="script-status" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"><option value="verificado">✅ Verificado</option><option value="teste">⚠️ Em Teste</option><option value="obsoleto">❌ Obsoleto</option></select></div><div class="flex-1"><label class="block text-sm font-medium text-gray-300 mb-2">Destaque</label><label class="flex items-center gap-2 bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white cursor-pointer"><input type="checkbox" id="script-featured" class="w-4 h-4 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-600"><span>Marcar como Destaque</span></label></div></div><div class="flex justify-end gap-4 mt-8 pt-4 border-t border-gray-800"><button type="button" class="cancel-modal-btn px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700">Cancelar</button><button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">Salvar</button></div></form></div></div>
-    <div id="executor-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 hidden"><div class="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-8 w-full max-w-2xl"><h3 class="text-2xl font-bold mb-6" id="executor-modal-title"></h3><form id="executor-form" class="space-y-4"><input type="hidden" id="executor-id"><div><label for="executor-name" class="block text-sm font-medium">Nome</label><input type="text" id="executor-name" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white" required></div><div><label for="executor-image-url" class="block text-sm font-medium">URL da Imagem</label><input type="url" id="executor-image-url" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"></div><div><label for="executor-description" class="block text-sm font-medium">Descrição</label><textarea id="executor-description" rows="3" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"></textarea></div><div><label for="executor-download-url" class="block text-sm font-medium">URL de Download</label><input type="url" id="executor-download-url" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white" placeholder="https://www.mediafire.com/..." required></div><div><label for="executor-device" class="block text-sm font-medium">Dispositivo</label><select id="executor-device" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"><option value="pc">PC 💻</option><option value="mobile">Mobile 📱</option><option value="both">Ambos 💻📱</option></select></div><div class="flex justify-end gap-4 mt-8"><button type="button" class="cancel-modal-btn px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700">Cancelar</button><button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">Salvar</button></div></form></div></div>
-    <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-[60] hidden"><div class="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-8 w-full max-w-md text-center"><h3 class="text-xl font-bold mb-4" id="confirm-modal-title"></h3><p id="confirm-modal-text" class="text-gray-300 mb-8"></p><div class="flex justify-center gap-4"><button id="confirm-modal-cancel" class="px-6 py-2 rounded-lg text-gray-300 bg-gray-700 hover:bg-gray-600">Cancelar</button><button id="confirm-modal-confirm" class="px-6 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold">Confirmar</button></div></div></div>
-    <div id="comments-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 hidden"><div class="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] flex flex-col"><div class="flex justify-between items-center mb-4"><h3 class="text-2xl font-bold" id="comments-modal-title">Comentários</h3><button class="cancel-modal-btn text-gray-400 hover:text-white text-2xl">&times;</button></div><div id="comments-list" class="flex-grow overflow-y-auto space-y-4 pr-2 bg-black/20 p-4 rounded-md mb-4"></div><form id="comment-form" class="flex gap-3"><input type="text" id="comment-input" placeholder="Deixe seu feedback..." class="flex-grow bg-gray-800 border border-gray-600 rounded-lg px-4 py-2" required><button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-5 py-2 rounded-lg">Enviar</button></form></div></div>
-
-    <!-- Módulo JavaScript -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, collection, onSnapshot, updateDoc, deleteDoc, query, getDoc, setDoc, getDocs, writeBatch, orderBy, addDoc, increment, runTransaction, serverTimestamp, arrayRemove, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-        // --- Configuração e Constantes ---
-        const ADMIN_PASSWORD = "luresadminscripts";
+    <!-- Todo o código da aplicação React -->
+    <script type="text/babel" data-presets="react">
+        // --- CONFIGURAÇÃO DO FIREBASE (FORNECIDA POR VOCÊ) ---
+        // IMPORTANTE: As chaves do Firebase devem estar aqui para o site funcionar.
         const firebaseConfig = {
-          apiKey: "AIzaSyC_eNoNlkjFrlJP_wLCb-vU7x2wrPZIjyI",
-          authDomain: "premium-lures.firebaseapp.com",
-          projectId: "premium-lures",
-          storageBucket: "premium-lures.appspot.com",
-          messagingSenderId: "74594132787",
-          appId: "1:74594132787:web:60319b79328c9156295446",
-          measurementId: "G-S1KE7ETDGX"
-        };
-        
-        // --- Inicialização Firebase ---
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        
-        // --- Referências DOM ---
-        const dom = {
-            loadingScreen: document.getElementById('loading-screen'),
-            loginScreen: document.getElementById('login-screen'),
-            loginForm: document.getElementById('login-form'),
-            accessKeyInput: document.getElementById('access-key'),
-            loginError: document.getElementById('login-error'),
-            loginTitleContainer: document.getElementById('login-title-container'),
-            ledPanel: document.getElementById('led-panel'),
-            appContainer: document.getElementById('app-container'),
-            homeBtn: document.getElementById('home-btn'),
-            mainNav: document.getElementById('main-nav'),
-            mainContent: document.getElementById('main-content'),
-            contentWrapper: document.getElementById('content-wrapper'),
-            adminPanel: document.getElementById('admin-panel'),
-            userPanel: document.getElementById('user-panel'),
-            globalSearchBar: document.getElementById('global-search-bar'),
-            sidebar: document.getElementById('main-sidebar'),
-            sidebarOverlay: document.getElementById('sidebar-overlay'),
-            menuToggleBtn: document.getElementById('menu-toggle-btn'),
-            menuCloseBtn: document.getElementById('menu-close-btn'),
-            keyManager: { modal: document.getElementById('key-manager-modal'), list: document.getElementById('key-list'), form: document.getElementById('generate-key-form'), idNameInput: document.getElementById('key-id-name') },
-            game: { modal: document.getElementById('game-modal'), form: document.getElementById('game-form'), id: document.getElementById('game-id'), name: document.getElementById('game-name'), title: document.getElementById('game-modal-title') },
-            script: { modal: document.getElementById('script-modal'), form: document.getElementById('script-form'), id: document.getElementById('script-id'), gameId: document.getElementById('script-game-id'), title: document.getElementById('script-title'), imageUrl: document.getElementById('script-image-url'), description: document.getElementById('script-description'), code: document.getElementById('script-code'), status: document.getElementById('script-status'), featured: document.getElementById('script-featured'), modalTitle: document.getElementById('script-modal-title') },
-            executor: { modal: document.getElementById('executor-modal'), form: document.getElementById('executor-form'), id: document.getElementById('executor-id'), name: document.getElementById('executor-name'), imageUrl: document.getElementById('executor-image-url'), description: document.getElementById('executor-description'), downloadUrl: document.getElementById('executor-download-url'), device: document.getElementById('executor-device'), title: document.getElementById('executor-modal-title') },
-            confirm: { modal: document.getElementById('confirm-modal'), title: document.getElementById('confirm-modal-title'), text: document.getElementById('confirm-modal-text'), confirmBtn: document.getElementById('confirm-modal-confirm'), cancelBtn: document.getElementById('confirm-modal-cancel') },
-            comments: { modal: document.getElementById('comments-modal'), title: document.getElementById('comments-modal-title'), list: document.getElementById('comments-list'), form: document.getElementById('comment-form'), input: document.getElementById('comment-input')},
-            profile: { modal: document.getElementById('profile-modal'), form: document.getElementById('profile-form'), nickname: document.getElementById('profile-nickname'), avatarPreview: document.getElementById('profile-avatar-preview'), avatarGallery: document.getElementById('avatar-gallery') }
-        };
-        
-        // --- Estado da Aplicação ---
-        let state = {
-            isAdmin: false,
-            activeView: null,
-            selectedItemId: null,
-            sortableInstances: {},
-            unsubscribeListeners: [],
-            activeKey: null,
-            userProfile: {},
-            ledInterval: null,
+          apiKey: "AIzaSyCg4Ls2_Pne8pEeKScs6CxQexEix7kASe0",
+          authDomain: "ronysc-c34b3.firebaseapp.com",
+          projectId: "ronysc-c34b3",
+          storageBucket: "ronysc-c34b3.firebasestorage.app",
+          messagingSenderId: "320295290031",
+          appId: "1:320295290031:web:95b8a804412c7d44aec05a"
         };
 
-        // --- Funções de Inicialização e Autenticação ---
-        function init() {
-            setupEventListeners();
-            checkSession();
-            setupLoginAnimations();
-        }
-
-        async function checkSession() {
-            const isAdmin = localStorage.getItem('isAdmin') === 'true';
-            const activeKey = sessionStorage.getItem('activeKey');
-
-            try {
-                await signInAnonymously(auth);
-                if (isAdmin) {
-                    state.isAdmin = true;
-                    state.activeKey = 'admin';
-                    enterApp();
-                    return;
-                }
-
-                if (activeKey) {
-                    const keyRef = doc(db, 'keys', activeKey);
-                    const keySnap = await getDoc(keyRef);
-                    if (keySnap.exists()) {
-                        state.isAdmin = false;
-                        state.activeKey = activeKey;
-                        await loadUserProfile(activeKey);
-                        enterApp();
-                    } else {
-                        logout();
-                    }
-                } else {
-                    dom.loadingScreen.classList.add('hidden');
-                    dom.loginScreen.classList.remove('hidden');
-                }
-            } catch (error) {
-                console.error("Authentication or session check failed:", error);
-                dom.loadingScreen.classList.add('hidden');
-                dom.loginScreen.classList.remove('hidden');
-                dom.loginError.textContent = "Erro de conexão. Tente novamente.";
-            }
-        }
-
-        dom.loginForm.onsubmit = async (e) => {
-            e.preventDefault();
-            const input = dom.accessKeyInput.value.trim();
-            dom.loginError.textContent = '';
-            if (!input) return;
-
-            if (input === ADMIN_PASSWORD) {
-                state.isAdmin = true;
-                state.activeKey = 'admin';
-                localStorage.setItem('isAdmin', 'true');
-                sessionStorage.setItem('activeKey', 'admin');
-                enterApp();
-                return;
-            }
-            
-            const keyRef = doc(db, 'keys', input);
-            try {
-                const keyDoc = await getDoc(keyRef);
-                if (!keyDoc.exists()) {
-                    throw new Error("Chave de acesso inválida!");
-                }
-                
-                state.isAdmin = false;
-                state.activeKey = input;
-                sessionStorage.setItem('activeKey', input);
-                await loadUserProfile(input);
-                enterApp();
-            } catch (error) {
-                console.error("Login failed:", error);
-                dom.loginError.textContent = error.message;
-            }
-        };
-
-        function enterApp() {
-            dom.loadingScreen.classList.add('hidden');
-            document.body.classList.toggle('is-admin', state.isAdmin);
-            dom.loginScreen.classList.add('hidden');
-            dom.appContainer.classList.remove('hidden');
-            dom.appContainer.classList.add('flex');
-            renderSidebar();
-            renderWelcome();
-        }
-
-        function logout() {
-            localStorage.clear();
-            sessionStorage.clear();
-            window.location.reload();
-        }
-
-        // --- Renderização da UI ---
-        function renderSidebar() {
-            dom.mainNav.innerHTML = `
-                <div id="executors-nav-section">
-                     <div class="nav-item group flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-200" data-type="executors" data-id="executors-tab">
-                        <i class="fa-solid fa-bolt fa-fw text-purple-400"></i><span class="font-medium">Lures Executores</span>
-                    </div>
-                </div>
-                <div id="games-nav-section">
-                    <div class="flex justify-between items-center pr-2">
-                        <h3 class="px-3 pt-4 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Scripts por Jogo</h3>
-                        ${state.isAdmin ? `<button data-type="game" class="order-btn text-gray-500 hover:text-white text-xs p-1"><i class="fa-solid fa-sort"></i></button>` : ''}
-                    </div>
-                    <div id="game-list" class="space-y-1">${renderNavSkeleton(4)}</div>
-                </div>`;
-            
-            loadNavItems('games', 'game-list', createGameNavListItem, 'game');
-            
-            if (state.isAdmin) {
-                dom.adminPanel.innerHTML = `
-                    <div id="order-controls" class="hidden flex gap-2"><button id="save-order" class="w-full bg-green-600/80 hover:bg-green-600 p-2 rounded-md text-sm">Salvar Ordem</button><button id="cancel-order" class="w-full bg-red-600/80 hover:bg-red-600 p-2 rounded-md text-sm">Cancelar</button></div>
-                    <button class="admin-btn bg-blue-600/20 text-blue-300" data-type="game"><i class="fa-solid fa-gamepad fa-fw"></i> Adicionar Jogo</button>
-                    <button class="admin-btn bg-yellow-600/20 text-yellow-300" data-type="key"><i class="fa-solid fa-key fa-fw"></i> Gerenciar Chaves</button>
-                `;
-                dom.adminPanel.querySelectorAll('.admin-btn').forEach(btn => btn.onclick = () => openModal(btn.dataset.type));
-                dom.mainNav.querySelectorAll('.order-btn').forEach(btn => btn.onclick = () => toggleOrderMode('game'));
-            }
-            
-            dom.userPanel.innerHTML = `
-                <button id="profile-btn" class="flex items-center gap-2 text-gray-300 hover:text-white transition-colors" title="Meu Perfil">
-                    <img id="sidebar-avatar" src="${state.userProfile.avatarUrl || generateAvatarUrl(state.activeKey || 'default')}" class="w-8 h-8 rounded-full bg-gray-700">
-                    <span id="sidebar-nickname" class="font-semibold text-sm">${state.isAdmin ? 'Admin' : (state.userProfile.nickname || 'Usuário')}</span>
-                </button>
-                <button id="logout-btn" class="bg-red-600/20 text-red-300 hover:bg-red-600/40 font-semibold py-2 px-3 rounded-lg transition-all" title="Sair"><i class="fa-solid fa-right-from-bracket"></i></button>`;
-            document.getElementById('logout-btn').onclick = logout;
-            document.getElementById('profile-btn').onclick = () => openModal('profile');
-
-            dom.mainNav.querySelector('[data-type="executors"]').onclick = () => selectItem(null, 'executors');
-        }
-
-        function renderWelcome() {
-            state.activeView = 'welcome';
-            state.selectedItemId = null;
-            updateNavSelection();
-            dom.contentWrapper.innerHTML = `<div class="p-8 h-full flex flex-col items-center justify-center text-center text-gray-500 fade-in"><i class="fa-solid fa-rocket text-5xl mb-4"></i><h2 class="text-3xl font-semibold">Bem-vindo ao Lures Premium</h2><p>Selecione um jogo na barra lateral para ver os scripts.</p></div>`;
-        }
-        
-        function renderScriptsView(game) {
-            dom.contentWrapper.innerHTML = `
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                    <h2 class="text-3xl font-bold text-white">${game.name}</h2>
-                    <div class="flex gap-4 items-center w-full sm:w-auto">
-                        <div class="relative flex-grow">
-                            <input type="search" id="script-search-bar" placeholder="Pesquisar scripts..." class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 pl-9 pr-3 text-sm focus:ring-1 focus:ring-blue-500 outline-none transition-all">
-                            <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
-                        </div>
-                        <div class="admin-only">
-                           <button id="add-script-btn" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105 glow-on-hover">
-                               <i class="fa-solid fa-plus"></i>
-                           </button>
-                        </div>
-                    </div>
-                </div>
-                <div id="script-list" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        // --- INICIALIZAÇÃO DOS SERVIÇOS FIREBASE ---
+        let auth, db;
+        let isFirebaseInitialized = false;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+            isFirebaseInitialized = true;
+        } catch (e) {
+            console.error("ERRO CRÍTICO: Não foi possível inicializar o Firebase. Verifique o objeto firebaseConfig.", e);
+            const rootDiv = document.getElementById('root');
+            rootDiv.innerHTML = `
+                <div style="padding: 40px; text-align: center; color: red;">
+                    <h1>Erro de Conexão</h1>
+                    <p>Não foi possível conectar ao banco de dados. Verifique as configurações do Firebase no código e sua conexão com a internet.</p>
                 </div>
             `;
-            document.getElementById('script-search-bar').addEventListener('input', handleScriptSearch);
-            if (state.isAdmin) {
-                document.getElementById('add-script-btn').onclick = (e) => openModal('script', null, game.id);
-            }
-            loadScriptsForGame(game.id);
         }
 
-        function renderExecutorsView() {
-            dom.contentWrapper.innerHTML = `
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-3xl font-bold text-white">Executores</h2>
-                    <div class="admin-only">
-                       <button id="add-executor-btn" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105 glow-on-hover">
-                           <i class="fa-solid fa-plus mr-2"></i>Adicionar Executor
-                       </button>
+
+        // --- ÍCONES (Componentes React) ---
+        const PcIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>;
+        const AndroidIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>;
+        const IosIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>;
+        const YoutubeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>;
+        const DiscordIcon = () => <svg role="img" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4464.8254-.6182 1.2525a17.7363 17.7363 0 00-4.9852 0 18.2202 18.2202 0 00-.6182-1.2525.0741.0741 0 00-.0785-.0371A19.7913 19.7913 0 003.683 4.3698a.0741.0741 0 00-.0371.0785C3.7243 9.0438 4.9643 13.115 8.4341 15.776a.0741.0741 0 00.0863-.0078 14.536 14.536 0 001.2482-.9395.0741.0741 0 00-.0216-.1112 12.1812 12.1812 0 01-1.8808-2.1482.0741.0741 0 01.0078-.094c.094-.0627.1958-.1254.2977-.1881a.0741.0741 0 01.094.0078c.4688.3753.9189.7662 1.3397 1.1728a.0741.0741 0 00.0863 0c.4208-.4066.8709-.7975 1.3397-1.1728a.0741.0741 0 01.094-.0078c.1018.0627.2037.1254.2977.1881a.0741.0741 0 01.0078.094 12.1812 12.1812 0 01-1.8808 2.1482.0741.0741 0 00-.0216.1112 14.536 14.536 0 001.2482.9395.0741.0741 0 00.0863.0078c3.4698-2.661 4.7098-6.7322 4.7882-11.3277a.0741.0741 0 00-.0371-.0785zM12.0001 13.417c-1.2188 0-2.2032-1.0625-2.2032-2.3713 0-1.3088 1.0032-2.3713 2.2032-2.3713s2.2032 1.0625 2.2032 2.3713c0 1.3088-.9844 2.3713-2.2032 2.3713zm4.0313-2.3713c0 1.3088-.9844 2.3713-2.2032 2.3713s-2.2032-1.0625-2.2032-2.3713c0-1.3088.9844-2.3713 2.2032-2.3713s2.2032 1.0625 2.2032 2.3713z"/></svg>;
+
+        // --- COMPONENTES DE UI ---
+        const { useState, useEffect } = React;
+
+        const Header = ({ setRoute, siteSettings, games }) => (
+          <header className="bg-gray-900/80 backdrop-blur-sm text-white sticky top-0 z-50 shadow-lg shadow-purple-500/10">
+            <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
+              <div className="text-2xl font-bold text-white cursor-pointer" onClick={() => setRoute({ page: 'home' })}>
+                {siteSettings.siteName || "Rony Scripts"}
+              </div>
+              <div className="hidden md:flex items-center space-x-6">
+                <a onClick={() => setRoute({ page: 'home' })} className="hover:text-purple-400 transition-colors cursor-pointer">Início</a>
+                <a onClick={() => setRoute({ page: 'executors' })} className="hover:text-purple-400 transition-colors cursor-pointer">Executores</a>
+                <div className="relative group">
+                  <button className="hover:text-purple-400 transition-colors">Scripts por Jogo</button>
+                  <div className="absolute left-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 invisible group-hover:visible">
+                    {games.map(game => (
+                      <a key={game.id} onClick={() => setRoute({ page: 'game', slug: game.slug })} className="block px-4 py-2 text-sm text-gray-300 hover:bg-purple-600 hover:text-white cursor-pointer">{game.name}</a>
+                    ))}
+                  </div>
+                </div>
+                <a onClick={() => setRoute({ page: 'how-to-use' })} className="hover:text-purple-400 transition-colors cursor-pointer">Como Usar</a>
+                <a onClick={() => setRoute({ page: 'partners' })} className="hover:text-purple-400 transition-colors cursor-pointer">Parcerias</a>
+              </div>
+              <div className="flex items-center space-x-4">
+                {siteSettings.socialLinks?.map(link => (
+                    <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition-colors">
+                        {link.name.toLowerCase() === 'youtube' && <YoutubeIcon />}
+                        {link.name.toLowerCase() === 'discord' && <DiscordIcon />}
+                    </a>
+                ))}
+              </div>
+            </nav>
+          </header>
+        );
+
+        const Footer = ({ siteSettings }) => (
+          <footer className="bg-gray-900 text-white mt-12">
+            <div className="container mx-auto px-6 py-4 text-center text-gray-400">
+              <p>&copy; {new Date().getFullYear()} {siteSettings.siteName || "Rony Scripts"}. Todos os direitos reservados.</p>
+              <p className="text-xs mt-2">Este site não é afiliado ao Roblox Corporation.</p>
+            </div>
+          </footer>
+        );
+
+        const StatusBadge = ({ status }) => {
+            const isUpdated = status === 'Atualizado';
+            const baseClasses = "px-3 py-1 text-xs font-bold rounded-full text-white shadow-md transition-all duration-300";
+            const updatedClasses = "bg-green-500 group-hover:bg-green-400 group-hover:shadow-green-500/50";
+            const outdatedClasses = "bg-red-500 group-hover:bg-red-400 group-hover:shadow-red-500/50";
+            
+            return (
+                <div className={`absolute top-3 right-3 ${baseClasses} ${isUpdated ? updatedClasses : outdatedClasses} ${isUpdated ? 'animate-pulse-green' : ''}`}>
+                    {status}
+                </div>
+            );
+        };
+
+        const PlatformIcons = ({ platforms }) => (
+            <div className="flex space-x-2 text-gray-400">
+                {platforms.includes('PC') && <div title="PC"><PcIcon /></div>}
+                {platforms.includes('Android') && <div title="Android"><AndroidIcon /></div>}
+                {platforms.includes('iOS') && <div title="iOS"><IosIcon /></div>}
+            </div>
+        );
+
+        const ItemCard = ({ item, setRoute }) => {
+            const handleDownloadClick = () => {
+                const itemRef = db.collection("items").doc(item.id);
+                itemRef.update({
+                    clickCount: firebase.firestore.FieldValue.increment(1)
+                });
+                window.open(item.externalUrl, '_blank');
+            };
+
+            return (
+                <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-purple-500/40 transition-shadow duration-300 group relative transform hover:-translate-y-1">
+                    <div className="relative cursor-pointer" onClick={() => setRoute({ page: 'item', slug: item.slug })}>
+                        <img src={item.imageUrl} alt={item.title} className="w-full h-48 object-cover" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/600x400/1f2937/7c3aed?text=Imagem+Indisponível'; }}/>
+                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all"></div>
+                        <StatusBadge status={item.status} />
                     </div>
-                </div>
-                <div id="executor-list" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                </div>
-            `;
-            if (state.isAdmin) {
-                document.getElementById('add-executor-btn').onclick = () => openModal('executor');
-            }
-            loadExecutors();
-        }
-
-        function loadNavItems(collectionName, elementId, renderFunction, type) {
-            const q = query(collection(db, collectionName), orderBy("order", "asc"));
-            const unsubscribe = onSnapshot(q, (snapshot) => {
-                const listElement = document.getElementById(elementId);
-                listElement.innerHTML = '';
-                snapshot.forEach(doc => listElement.appendChild(renderFunction({ id: doc.id, ...doc.data() }, type)));
-            }, error => console.error(`Error loading ${collectionName}:`, error));
-            state.unsubscribeListeners.push(unsubscribe);
-        }
-        
-        function loadScriptsForGame(gameId) {
-            const q = query(collection(db, 'games', gameId, 'scripts'));
-            const unsubscribe = onSnapshot(q, (snapshot) => {
-                const listEl = document.getElementById('script-list');
-                if (!listEl) return;
-                listEl.innerHTML = snapshot.empty ? '<p class="text-gray-400 col-span-full">Nenhum script encontrado para este jogo.</p>' : '';
-                snapshot.docs.sort((a,b) => (b.data().featured || false) - (a.data().featured || false)).forEach(doc => {
-                    const scriptData = { id: doc.id, gameId, ...doc.data() };
-                    const card = createScriptCard(scriptData);
-                    listEl.appendChild(card);
-                });
-            }, error => console.error(`Error loading scripts for ${gameId}:`, error));
-            state.unsubscribeListeners.push(unsubscribe);
-        }
-
-        function loadExecutors() {
-            const q = query(collection(db, 'executors'), orderBy("name", "asc"));
-            const unsubscribe = onSnapshot(q, (snapshot) => {
-                const listEl = document.getElementById('executor-list');
-                if (!listEl) return;
-                listEl.innerHTML = snapshot.empty ? '<p class="text-gray-400 col-span-full">Nenhum executor encontrado.</p>' : '';
-                snapshot.forEach(doc => listEl.appendChild(createExecutorCard({ id: doc.id, ...doc.data() })));
-            }, error => console.error(`Error loading executors:`, error));
-            state.unsubscribeListeners.push(unsubscribe);
-        }
-
-        function loadKeys() {
-            const q = query(collection(db, 'keys'));
-            const unsubscribe = onSnapshot(q, (snapshot) => {
-                dom.keyManager.list.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const keyData = doc.data(); // Pega os dados do documento
-                    const el = document.createElement('div');
-                    el.className = 'bg-gray-800 p-3 rounded-md flex justify-between items-center text-sm';
-                    // CORREÇÃO: Exibe o nome da chave e usa no botão de deletar
-                    el.innerHTML = `
-                        <div>
-                            <span class="font-mono text-gray-300">${doc.id}</span>
-                            <span class="text-gray-500 ml-4">${keyData.name || 'Sem nome'}</span>
-                        </div>
-                        <button class="delete-btn text-red-500 hover:text-red-400" data-id="${doc.id}" data-name="${keyData.name || doc.id}" data-type="key"><i class="fa-solid fa-trash"></i></button>
-                    `;
-                    dom.keyManager.list.appendChild(el);
-                });
-            }, error => {
-                console.error(`Error loading keys:`, error);
-                dom.keyManager.list.innerHTML = `<p class="text-red-400 text-center">Erro ao carregar chaves. Verifique as regras de segurança do Firestore.</p>`;
-            });
-            state.unsubscribeListeners.push(unsubscribe);
-        }
-        
-        function createGameNavListItem(item, type) {
-            const el = document.createElement('div');
-            el.className = `nav-item group flex justify-between items-center px-3 py-2 rounded-md cursor-pointer transition-colors duration-200`;
-            el.dataset.id = item.id;
-            el.dataset.name = item.name;
-            el.dataset.type = type;
-            el.innerHTML = `
-                <span class="truncate font-medium">${item.name}</span>
-                <div class="admin-only items-center opacity-0 group-hover:opacity-100 transition-opacity gap-1">
-                    <button class="edit-btn text-gray-400 hover:text-yellow-400 p-1" data-id="${item.id}" data-name="${item.name}" data-type="${type}"><i class="fa-solid fa-pencil fa-xs"></i></button>
-                    <button class="delete-btn text-gray-400 hover:text-red-400 p-1" data-id="${item.id}" data-name="${item.name}" data-type="${type}"><i class="fa-solid fa-trash fa-xs"></i></button>
-                </div>`;
-            el.onclick = (e) => {
-                if (!e.target.closest('.edit-btn') && !e.target.closest('.delete-btn')) {
-                    selectItem(item, type);
-                }
-            };
-            return el;
-        }
-
-        function createScriptCard(script) {
-            const card = document.createElement('div');
-            card.className = "bg-gray-800/50 border border-gray-700/60 rounded-lg overflow-hidden flex flex-col script-card fade-in";
-            card.dataset.title = script.title;
-            
-            const statusMap = {
-                verificado: { text: 'Verificado', color: 'text-green-400', icon: 'fa-check-circle' },
-                teste: { text: 'Em Teste', color: 'text-yellow-400', icon: 'fa-exclamation-triangle' },
-                obsoleto: { text: 'Obsoleto', color: 'text-red-400', icon: 'fa-times-circle' }
-            };
-            const currentStatus = statusMap[script.status] || statusMap.teste;
-            
-            card.innerHTML = `
-                ${script.imageUrl ? `<img src="${script.imageUrl}" alt="${script.title}" class="script-card-img">` : ''}
-                <div class="p-4 flex flex-col flex-grow">
-                    <h3 class="text-lg font-bold text-white mb-2 flex justify-between items-start">${script.title} ${script.featured ? '<i class="fa-solid fa-star text-yellow-400 text-sm" title="Destaque"></i>' : ''}</h3>
-                    <p class="text-gray-400 text-sm mb-4 flex-grow">${script.description || 'Sem descrição.'}</p>
-                    <div class="flex items-center justify-between mb-4">
-                        <p class="text-xs ${currentStatus.color}"><i class="fa-solid ${currentStatus.icon} mr-1"></i> ${currentStatus.text}</p>
-                        <div class="flex items-center gap-4 text-gray-400 text-sm">
-                            <button class="flex items-center gap-1 comment-btn" data-game-id="${script.gameId}" data-id="${script.id}">
-                                <i class="fa-solid fa-comments"></i>
-                                <span>${script.commentCount || 0}</span>
+                    <div className="p-4">
+                        <h3 className="text-lg font-bold text-white mb-2 truncate cursor-pointer" onClick={() => setRoute({ page: 'item', slug: item.slug })}>{item.title}</h3>
+                        <p className="text-sm text-gray-400 mb-4">{item.type === 'script' ? `Jogo: ${item.game}` : 'Executor'}</p>
+                        <div className="flex justify-between items-center">
+                            <PlatformIcons platforms={item.platforms} />
+                            <button onClick={handleDownloadClick} className="bg-purple-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-purple-700 transition-colors">
+                                Obter
                             </button>
                         </div>
                     </div>
-                    <div class="flex gap-2 mt-auto">
-                        <button class="copy-btn flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-3 rounded-md text-sm transition-all" data-code="${btoa(unescape(encodeURIComponent(script.code)))}"><i class="fa-solid fa-copy mr-2"></i>Copiar</button>
-                        <div class="admin-only-inline gap-2">
-                           <button class="edit-script-btn bg-yellow-600/80 hover:bg-yellow-600 text-white font-semibold py-2 px-3 rounded-md text-sm transition-all"><i class="fa-solid fa-pencil"></i></button>
-                           <button class="delete-script-btn bg-red-600/80 hover:bg-red-600 text-white font-semibold py-2 px-3 rounded-md text-sm transition-all"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>
-                </div>`;
+                </div>
+            );
+        };
 
-            if(state.isAdmin){
-                card.querySelector('.edit-script-btn').onclick = () => openModal('script', btoa(JSON.stringify(script)));
-                card.querySelector('.delete-script-btn').onclick = () => handleDelete('script', script.id, script.title, script.gameId);
-            }
-            return card;
-        }
+        // --- PÁGINAS PÚBLICAS ---
 
-        function createExecutorCard(executor) {
-            const card = document.createElement('div');
-            card.className = "bg-gray-800/50 border border-gray-700/60 rounded-lg overflow-hidden flex flex-col script-card fade-in";
+        const HomePage = ({ setRoute }) => {
+            const [executors, setExecutors] = useState([]);
+            const [scripts, setScripts] = useState([]);
             
-            const deviceMap = {
-                pc: { text: 'PC', icon: 'fa-desktop' },
-                mobile: { text: 'Mobile', icon: 'fa-mobile-screen-button' },
-                both: { text: 'Ambos', icon: 'fa-laptop-mobile' }
-            };
-            const device = deviceMap[executor.device] || deviceMap.pc;
+            useEffect(() => {
+                const fetchItems = async () => {
+                    // FIX: Firestore index error fix
+                    // Fetch executors without ordering in the query
+                    const execQuery = db.collection("items").where("type", "==", "executor");
+                    const execSnap = await execQuery.get();
+                    const allExecutors = execSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    // Sort in JavaScript and take the first 4
+                    allExecutors.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
+                    setExecutors(allExecutors.slice(0, 4));
 
-            card.innerHTML = `
-                ${executor.imageUrl ? `<img src="${executor.imageUrl}" alt="${executor.name}" class="script-card-img">` : ''}
-                <div class="p-4 flex flex-col flex-grow">
-                    <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-lg font-bold text-white">${executor.name}</h3>
-                        <span class="text-xs text-gray-400 flex items-center gap-2"><i class="fa-solid ${device.icon}"></i> ${device.text}</span>
-                    </div>
-                    <p class="text-gray-400 text-sm mb-4 flex-grow">${executor.description || 'Sem descrição.'}</p>
-                    <div class="flex gap-2 mt-auto">
-                        <a href="${executor.downloadUrl}" target="_blank" class="flex-1 text-center bg-green-600 hover:bg-green-500 text-white font-semibold py-2 px-3 rounded-md text-sm transition-all"><i class="fa-solid fa-download mr-2"></i>Download</a>
-                        <div class="admin-only-inline gap-2">
-                           <button class="edit-executor-btn bg-yellow-600/80 hover:bg-yellow-600 text-white font-semibold py-2 px-3 rounded-md text-sm transition-all"><i class="fa-solid fa-pencil"></i></button>
-                           <button class="delete-executor-btn bg-red-600/80 hover:bg-red-600 text-white font-semibold py-2 px-3 rounded-md text-sm transition-all"><i class="fa-solid fa-trash"></i></button>
+                    // FIX: Firestore index error fix for popular scripts
+                    const scriptQuery = db.collection("items").where("type", "==", "script");
+                    const scriptSnap = await scriptQuery.get();
+                    const allScripts = scriptSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    // Sort by clickCount in JavaScript
+                    allScripts.sort((a, b) => (b.clickCount || 0) - (a.clickCount || 0));
+                    setScripts(allScripts.slice(0, 8));
+                };
+                fetchItems();
+            }, []);
+
+            return (
+                <div className="container mx-auto px-6 py-8">
+                    <section>
+                        <h2 className="text-3xl font-bold text-white mb-6 border-l-4 border-purple-500 pl-4">Executores em Destaque</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {executors.map(item => <ItemCard key={item.id} item={item} setRoute={setRoute} />)}
                         </div>
+                    </section>
+                    <section className="mt-12">
+                        <h2 className="text-3xl font-bold text-white mb-6 border-l-4 border-purple-500 pl-4">Scripts Populares</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            {scripts.map(item => <ItemCard key={item.id} item={item} setRoute={setRoute} />)}
+                        </div>
+                    </section>
+                </div>
+            );
+        };
+
+        const ExecutorsPage = ({ setRoute }) => {
+            const [items, setItems] = useState([]);
+            useEffect(() => {
+                const fetchItems = async () => {
+                    // FIX: Firestore index error fix
+                    // Fetch all executors and sort them in JavaScript
+                    const q = db.collection("items").where("type", "==", "executor");
+                    const querySnapshot = await q.get();
+                    const allItems = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    allItems.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
+                    setItems(allItems);
+                };
+                fetchItems();
+            }, []);
+
+            return (
+                <div className="container mx-auto px-6 py-8">
+                    <h1 className="text-4xl font-bold text-white mb-8">Todos os Executores</h1>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {items.map(item => <ItemCard key={item.id} item={item} setRoute={setRoute} />)}
                     </div>
-                </div>`;
-            if(state.isAdmin){
-                card.querySelector('.edit-executor-btn').onclick = () => openModal('executor', btoa(JSON.stringify(executor)));
-                card.querySelector('.delete-executor-btn').onclick = () => handleDelete('executor', executor.id, executor.name);
-            }
-            return card;
-        }
+                </div>
+            );
+        };
 
-        function renderNavSkeleton(count) { return Array(count).fill('').map(() => `<div class="px-3 py-2 rounded-md bg-gray-700/50 skeleton h-[36px] mb-1"></div>`).join(''); }
-        
-        // --- Manipuladores de Eventos ---
-        function setupEventListeners() {
-            document.querySelectorAll('.cancel-modal-btn').forEach(btn => btn.onclick = () => {
-                btn.closest('.fixed').classList.add('hidden');
-                state.unsubscribeListeners.forEach(unsub => unsub());
-                state.unsubscribeListeners = [];
-            });
-            dom.globalSearchBar.oninput = handleGlobalSearch;
-            dom.homeBtn.onclick = renderWelcome;
-            dom.game.form.onsubmit = handleGameSubmit;
-            dom.executor.form.onsubmit = handleExecutorSubmit;
-            dom.script.form.onsubmit = handleScriptSubmit;
-            dom.keyManager.form.onsubmit = handleGenerateKey;
-            dom.profile.form.onsubmit = handleProfileSubmit;
-            dom.confirm.cancelBtn.onclick = () => dom.confirm.modal.classList.add('hidden');
-            
-            dom.menuToggleBtn.onclick = toggleSidebar;
-            dom.menuCloseBtn.onclick = toggleSidebar;
-            dom.sidebarOverlay.onclick = toggleSidebar;
+        const GamePage = ({ slug, setRoute }) => {
+            const [items, setItems] = useState([]);
+            const [gameName, setGameName] = useState('');
 
-            document.body.addEventListener('click', e => {
-                const deleteBtn = e.target.closest('.delete-btn');
-                if (deleteBtn) {
-                    e.stopPropagation();
-                    handleDelete(deleteBtn.dataset.type, deleteBtn.dataset.id, deleteBtn.dataset.name, deleteBtn.closest('[data-game-id]')?.dataset.gameId);
-                }
-                const editBtn = e.target.closest('.edit-btn');
-                if (editBtn) {
-                    e.stopPropagation();
-                    openModal(editBtn.dataset.type, { id: editBtn.dataset.id, name: editBtn.dataset.name });
-                }
-                
-                const commentBtn = e.target.closest('.comment-btn');
-                if (commentBtn) openCommentsModal(commentBtn.dataset.gameId, commentBtn.dataset.id);
+            useEffect(() => {
+                const fetchItems = async () => {
+                    const gamesQuery = db.collection("games").where("slug", "==", slug);
+                    const gamesSnapshot = await gamesQuery.get();
+                    if (!gamesSnapshot.empty) {
+                        const gameData = gamesSnapshot.docs[0].data();
+                        setGameName(gameData.name);
 
-                const copyBtn = e.target.closest('.copy-btn');
-                if (copyBtn) copyToClipboard(copyBtn, copyBtn.dataset.code);
-
-                const avatarOption = e.target.closest('.avatar-option');
-                if (avatarOption) selectAvatar(avatarOption);
-            });
-        }
-
-        function toggleSidebar() { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); }
-
-        function selectItem(item, type) {
-            state.unsubscribeListeners.forEach(unsub => unsub());
-            state.unsubscribeListeners = [];
-
-            state.selectedItemId = item ? item.id : type + '-tab';
-            state.activeView = type;
-            updateNavSelection();
-            if (type === 'game') renderScriptsView(item);
-            else if (type === 'executors') renderExecutorsView();
-            else if (type === 'welcome') { dom.contentWrapper.innerHTML = `<div class="p-8 h-full flex flex-col items-center justify-center text-center text-gray-500 fade-in"><i class="fa-solid fa-rocket text-5xl mb-4"></i><h2 class="text-3xl font-semibold">Bem-vindo ao Lures Premium</h2><p>Selecione um jogo na barra lateral para ver os scripts.</p></div>`; }
-            if (window.innerWidth < 768) { toggleSidebar(); }
-        }
-
-        function updateNavSelection() { document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.id === state.selectedItemId)); }
-        
-        function handleGlobalSearch(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            document.querySelectorAll('#main-nav .nav-item').forEach(item => {
-                const name = item.dataset.name || item.querySelector('span').textContent;
-                item.style.display = name.toLowerCase().includes(searchTerm) ? 'flex' : 'none';
-            });
-        }
-
-        function handleScriptSearch(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            document.querySelectorAll('#script-list .script-card').forEach(card => {
-                const title = card.dataset.title || '';
-                card.style.display = title.toLowerCase().includes(searchTerm) ? 'flex' : 'none';
-            });
-        }
-        
-        window.copyToClipboard = (btn, encodedCode) => {
-            try {
-                const code = decodeURIComponent(escape(atob(encodedCode)));
-                navigator.clipboard.writeText(code).then(() => {
-                    const btnText = btn.innerHTML;
-                    btn.innerHTML = 'Copiado!';
-                    btn.classList.add('bg-green-500', 'hover:bg-green-500');
-                    setTimeout(() => {
-                        btn.innerHTML = btnText;
-                        btn.classList.remove('bg-green-500', 'hover:bg-green-500');
-                    }, 2000);
-                });
-            } catch (e) { console.error('Failed to copy', e); alert('Erro ao copiar o script.'); }
-        }
-        
-        window.openModal = (type, data, gameId = null) => {
-            if (type === 'key') { dom.keyManager.modal.classList.remove('hidden'); loadKeys(); return; }
-            if (type === 'profile') { populateProfileModal(); dom.profile.modal.classList.remove('hidden'); return; }
-            if (!dom[type]) return;
-
-            const modal = dom[type].modal;
-            const form = dom[type].form;
-            form.reset();
-
-            if (type === 'script') {
-                const scriptData = data ? JSON.parse(atob(data)) : null;
-                dom.script.modalTitle.textContent = scriptData ? 'Editar Script' : 'Adicionar Script';
-                dom.script.id.value = scriptData?.id || '';
-                dom.script.gameId.value = scriptData?.gameId || gameId;
-                dom.script.title.value = scriptData?.title || '';
-                dom.script.imageUrl.value = scriptData?.imageUrl || '';
-                dom.script.description.value = scriptData?.description || '';
-                dom.script.code.value = scriptData?.code || '';
-                dom.script.status.value = scriptData?.status || 'verificado';
-                dom.script.featured.checked = scriptData?.featured || false;
-            } else { 
-                const itemData = data ? (typeof data === 'string' ? JSON.parse(atob(data)) : data) : null;
-                const typeName = type.charAt(0).toUpperCase() + type.slice(1);
-                dom[type].title.textContent = itemData ? `Editar ${typeName}` : `Adicionar ${typeName}`;
-                dom[type].id.value = itemData?.id || '';
-                if(dom[type].name) dom[type].name.value = itemData?.name || '';
-                if (type === 'executor') {
-                    dom.executor.imageUrl.value = itemData?.imageUrl || '';
-                    dom.executor.description.value = itemData?.description || '';
-                    dom.executor.downloadUrl.value = itemData?.downloadUrl || '';
-                    dom.executor.device.value = itemData?.device || 'pc';
-                }
-            }
-            modal.classList.remove('hidden');
-        }
-
-        // --- Submissão de Forms ---
-        async function handleGameSubmit(e) {
-            e.preventDefault();
-            const id = dom.game.id.value;
-            const name = dom.game.name.value.trim();
-            if (!name) return;
-            const collectionRef = collection(db, 'games');
-            const docData = { name };
-            try {
-                if (id) {
-                    await setDoc(doc(collectionRef, id), docData, { merge: true });
-                } else {
-                    const q = query(collectionRef);
-                    const querySnapshot = await getDocs(q);
-                    docData.order = querySnapshot.size;
-                    await addDoc(collectionRef, docData);
-                }
-                dom.game.modal.classList.add('hidden');
-            } catch (error) { console.error("Error saving game:", error); }
-        }
-
-        async function handleExecutorSubmit(e) {
-            e.preventDefault();
-            const id = dom.executor.id.value;
-            const docData = { name: dom.executor.name.value.trim(), imageUrl: dom.executor.imageUrl.value, description: dom.executor.description.value, downloadUrl: dom.executor.downloadUrl.value, device: dom.executor.device.value };
-            if (!docData.name) return;
-            try {
-                if (id) {
-                    await updateDoc(doc(db, 'executors', id), docData);
-                } else {
-                    await addDoc(collection(db, 'executors'), docData);
-                }
-                dom.executor.modal.classList.add('hidden');
-            } catch (error) { console.error("Error saving executor:", error); }
-        }
-
-        async function handleScriptSubmit(e) {
-            e.preventDefault();
-            const id = dom.script.id.value;
-            const gameId = dom.script.gameId.value;
-            if (!gameId) { alert("Game ID is missing!"); return; }
-            const docData = { title: dom.script.title.value, imageUrl: dom.script.imageUrl.value, description: dom.script.description.value, code: dom.script.code.value, status: dom.script.status.value, featured: dom.script.featured.checked, };
-            try {
-                const scriptCollection = collection(db, 'games', gameId, 'scripts');
-                if (id) {
-                    await updateDoc(doc(scriptCollection, id), docData);
-                } else {
-                    docData.commentCount = 0;
-                    docData.createdAt = serverTimestamp();
-                    await addDoc(scriptCollection, docData);
-                }
-                dom.script.modal.classList.add('hidden');
-            } catch (error) { console.error("Error saving script:", error); }
-        }
-        
-        async function handleGenerateKey(e) {
-            e.preventDefault();
-            const idName = dom.keyManager.idNameInput.value.trim();
-            if (!idName) { alert("Por favor, insira um nome de identificação."); return; }
-            const newKey = 'lures-' + crypto.randomUUID().substring(0, 18);
-            try {
-                await setDoc(doc(db, 'keys', newKey), { name: idName, createdAt: new Date().toISOString() });
-                dom.keyManager.form.reset();
-            } catch (error) { console.error("Error generating key:", error); }
-        }
-        
-        async function handleProfileSubmit(e) {
-            e.preventDefault();
-            if (!state.activeKey || state.isAdmin) return;
-            const nickname = dom.profile.nickname.value.trim();
-            const selectedAvatar = dom.profile.avatarGallery.querySelector('.selected');
-            const avatarUrl = selectedAvatar ? selectedAvatar.dataset.url : state.userProfile.avatarUrl;
-            if (!nickname) { alert("O apelido não pode estar em branco."); return; }
-            try {
-                const profileRef = doc(db, 'profiles', state.activeKey);
-                await setDoc(profileRef, { nickname, avatarUrl }, { merge: true });
-                await loadUserProfile(state.activeKey);
-                updateUIAfterProfileChange();
-                dom.profile.modal.classList.add('hidden');
-            } catch (error) { console.error("Erro ao salvar perfil:", error); alert("Não foi possível salvar seu perfil."); }
-        }
-
-        // --- Ações do Usuário ---
-        window.handleDelete = async (type, id, name, gameId = null) => {
-            let title = `Confirmar Exclusão`;
-            let text = `Tem certeza que deseja excluir "${name}"? Esta ação não pode ser desfeita.`;
-            if (type === 'game') text = `Tem certeza que deseja excluir o jogo "${name}"? TODOS os scripts e seus dados (comentários, etc) serão perdidos permanentemente.`
-            dom.confirm.title.textContent = title;
-            dom.confirm.text.textContent = text;
-            dom.confirm.modal.classList.remove('hidden');
-            dom.confirm.confirmBtn.onclick = async () => {
-                try {
-                    if (type === 'key') await deleteDoc(doc(db, 'keys', id));
-                    if (type === 'executor') await deleteDoc(doc(db, 'executors', id));
-                    if (type === 'script') await deleteDoc(doc(db, 'games', gameId, 'scripts', id));
-                    if (type === 'game') {
-                        const gameDocRef = doc(db, 'games', id);
-                        const batch = writeBatch(db);
-                        const scriptsSnapshot = await getDocs(collection(gameDocRef, 'scripts'));
-                        for(const scriptDoc of scriptsSnapshot.docs) {
-                            const commentsSnapshot = await getDocs(collection(scriptDoc.ref, 'comments'));
-                            commentsSnapshot.forEach(commentDoc => batch.delete(commentDoc.ref));
-                            batch.delete(scriptDoc.ref);
-                        }
-                        batch.delete(gameDocRef);
-                        await batch.commit();
-                        if (state.selectedItemId === id) renderWelcome();
+                        // FIX: Firestore index error fix
+                        // Fetch scripts for the game and sort them in JavaScript
+                        const itemsQuery = db.collection("items").where("type", "==", "script").where("game", "==", gameData.name);
+                        const itemsSnapshot = await itemsQuery.get();
+                        const allItems = itemsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        allItems.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
+                        setItems(allItems);
                     }
-                } catch (error) { console.error(`Error deleting ${type}:`, error); } finally { dom.confirm.modal.classList.add('hidden'); }
-            };
-        }
-        
-        async function openCommentsModal(gameId, scriptId) {
-            dom.comments.modal.classList.remove('hidden');
-            dom.comments.form.dataset.gameId = gameId;
-            dom.comments.form.dataset.scriptId = scriptId;
-            const commentsRef = collection(db, 'games', gameId, 'scripts', scriptId, 'comments');
-            const q = query(commentsRef, orderBy('createdAt', 'desc'));
-            const unsubscribe = onSnapshot(q, (snapshot) => {
-                dom.comments.list.innerHTML = snapshot.empty ? '<p class="text-gray-500 text-center">Nenhum comentário ainda. Seja o primeiro!</p>' : '';
-                snapshot.forEach(doc => {
-                    const comment = doc.data();
-                    const commentEl = document.createElement('div');
-                    commentEl.className = 'flex items-start gap-3 bg-gray-800 p-3 rounded-lg';
-                    commentEl.innerHTML = `
-                        <img src="${comment.userAvatar || generateAvatarUrl(comment.userKey)}" class="w-10 h-10 rounded-full bg-gray-700 mt-1">
-                        <div class="flex-grow">
-                            <div class="flex justify-between items-start">
-                                <p class="font-semibold text-blue-400">${comment.userNickname || 'Usuário'}</p>
-                                ${state.isAdmin ? `<button class="delete-comment-btn text-gray-500 hover:text-red-400" data-comment-id="${doc.id}"><i class="fas fa-trash fa-xs"></i></button>` : ''}
-                            </div>
-                            <p class="text-gray-300 text-sm">${comment.text}</p>
-                            <p class="text-xs text-gray-500 mt-2">${new Date(comment.createdAt?.toDate()).toLocaleString()}</p>
-                        </div>`;
-                    dom.comments.list.appendChild(commentEl);
-                });
-            });
-            state.unsubscribeListeners.push(unsubscribe);
-        }
+                };
+                fetchItems();
+            }, [slug]);
 
-        dom.comments.form.onsubmit = async (e) => {
-            e.preventDefault();
-            const { gameId, scriptId } = e.currentTarget.dataset;
-            const text = dom.comments.input.value.trim();
-            if(!text) return;
-            const scriptRef = doc(db, 'games', gameId, 'scripts', scriptId);
-            const commentsRef = collection(scriptRef, 'comments');
-            try {
-                await addDoc(commentsRef, { text, userKey: state.activeKey, userNickname: state.userProfile.nickname, userAvatar: state.userProfile.avatarUrl, createdAt: serverTimestamp() });
-                await updateDoc(scriptRef, { commentCount: increment(1) });
-                dom.comments.form.reset();
-            } catch (error) { console.error("Error submitting comment:", error); }
+            return (
+                <div className="container mx-auto px-6 py-8">
+                    <h1 className="text-4xl font-bold text-white mb-8">Scripts para {gameName}</h1>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {items.map(item => <ItemCard key={item.id} item={item} setRoute={setRoute} />)}
+                    </div>
+                </div>
+            );
+        };
+
+        const ItemPage = ({ slug }) => {
+            const [item, setItem] = useState(null);
+
+            useEffect(() => {
+                const fetchItem = async () => {
+                    const q = db.collection("items").where("slug", "==", slug).limit(1);
+                    const querySnapshot = await q.get();
+                    if (!querySnapshot.empty) {
+                        setItem({ id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() });
+                    }
+                };
+                fetchItem();
+            }, [slug]);
+
+            const handleDownloadClick = () => {
+                if (!item) return;
+                const itemRef = db.collection("items").doc(item.id);
+                itemRef.update({
+                    clickCount: firebase.firestore.FieldValue.increment(1)
+                });
+                window.open(item.externalUrl, '_blank');
+            };
+
+            if (!item) return <div className="text-white text-center py-20">Carregando...</div>;
+
+            const getYoutubeEmbedUrl = (url) => {
+                if (!url) return null;
+                const videoIdMatch = url.match(/(?:v=|\/embed\/|\.be\/)([\w-]{11})/);
+                return videoIdMatch ? `https://www.youtube.com/embed/${videoIdMatch[1]}` : null;
+            };
+
+            return (
+                <div className="container mx-auto px-6 py-8">
+                    <div className="bg-gray-800 rounded-lg shadow-xl p-6 md:p-8">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div className="md:col-span-1">
+                                <img src={item.imageUrl} alt={item.title} className="w-full rounded-lg shadow-lg" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/600x400/1f2937/7c3aed?text=Imagem+Indisponível'; }}/>
+                            </div>
+                            <div className="md:col-span-2">
+                                <h1 className="text-4xl font-bold text-white mb-4">{item.title}</h1>
+                                <div className="flex items-center space-x-4 mb-4">
+                                    <StatusBadge status={item.status} />
+                                    <PlatformIcons platforms={item.platforms} />
+                                </div>
+                                <p className="text-gray-300 mb-6">{item.description}</p>
+                                <button onClick={handleDownloadClick} className="w-full bg-purple-600 text-white px-6 py-3 rounded-md font-bold text-lg hover:bg-purple-700 transition-colors">
+                                    OBTER SCRIPT/EXECUTOR
+                                </button>
+                            </div>
+                        </div>
+                        {item.youtubeUrl && getYoutubeEmbedUrl(item.youtubeUrl) && (
+                            <div className="mt-12">
+                                <h2 className="text-2xl font-bold text-white mb-4">Vídeo de Demonstração</h2>
+                                <div className="aspect-w-16 aspect-h-9">
+                                    <iframe 
+                                        src={getYoutubeEmbedUrl(item.youtubeUrl)} 
+                                        frameBorder="0" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                        allowFullScreen
+                                        className="w-full h-full rounded-lg"
+                                    ></iframe>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const HowToUsePage = () => {
+            const [pageData, setPageData] = useState(null);
+
+            useEffect(() => {
+                const fetchPage = async () => {
+                    const docRef = db.collection("pages").doc("how-to-use");
+                    const docSnap = await docRef.get();
+                    if (docSnap.exists) {
+                        setPageData(docSnap.data());
+                    }
+                };
+                fetchPage();
+            }, []);
+            
+            const getYoutubeEmbedUrl = (url) => {
+                if (!url) return null;
+                const videoIdMatch = url.match(/(?:v=|\/embed\/|\.be\/)([\w-]{11})/);
+                return videoIdMatch ? `https://www.youtube.com/embed/${videoIdMatch[1]}` : null;
+            };
+
+            return (
+                <div className="container mx-auto px-6 py-8 text-white">
+                    <h1 className="text-4xl font-bold mb-8">Como Usar Scripts</h1>
+                    {pageData ? (
+                        <div className="bg-gray-800 p-8 rounded-lg">
+                            <h2 className="text-3xl font-bold mb-4">{pageData.title}</h2>
+                            <div className="prose prose-invert max-w-none text-gray-300" dangerouslySetInnerHTML={{ __html: pageData.description }}></div>
+                            {pageData.youtubeUrl && getYoutubeEmbedUrl(pageData.youtubeUrl) && (
+                                <div className="mt-8 aspect-w-16 aspect-h-9">
+                                    <iframe 
+                                        src={getYoutubeEmbedUrl(pageData.youtubeUrl)} 
+                                        frameBorder="0" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                        allowFullScreen
+                                        className="w-full h-full rounded-lg"
+                                    ></iframe>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <p>Conteúdo ainda não adicionado. Volte em breve!</p>
+                    )}
+                </div>
+            );
+        };
+
+        const PartnersPage = () => {
+            const [partners, setPartners] = useState([]);
+
+            useEffect(() => {
+                const fetchPartners = async () => {
+                    const q = db.collection("partners").orderBy("name");
+                    const querySnapshot = await q.get();
+                    setPartners(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                };
+                fetchPartners();
+            }, []);
+
+            return (
+                <div className="container mx-auto px-6 py-8 text-white">
+                    <h1 className="text-4xl font-bold mb-8">Nossos Parceiros</h1>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {partners.map(partner => (
+                            <a key={partner.id} href={partner.url} target="_blank" rel="noopener noreferrer" className="block bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-purple-500/40 transition-shadow duration-300 transform hover:-translate-y-1">
+                                <img src={partner.imageUrl} alt={partner.name} className="h-24 mx-auto mb-4 object-contain" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/300x150/1f2937/7c3aed?text=Logo'; }}/>
+                                <h3 className="text-xl font-bold text-center text-white">{partner.name}</h3>
+                                <p className="text-gray-400 text-center mt-2">{partner.description}</p>
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- PAINEL DE ADMINISTRAÇÃO ---
+
+        const AdminLogin = ({ setUser }) => {
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+
+            const handleLogin = async (e) => {
+                e.preventDefault();
+                setError('');
+                try {
+                    await auth.signInWithEmailAndPassword(email, password);
+                } catch (err) {
+                    setError("Falha no login. Verifique suas credenciais.");
+                    console.error(err);
+                }
+            };
+
+            return (
+                <div className="flex items-center justify-center min-h-screen bg-gray-900">
+                    <div className="w-full max-w-md bg-gray-800 p-8 rounded-lg shadow-lg">
+                        <h1 className="text-3xl font-bold text-white text-center mb-6">Admin Login</h1>
+                        <form onSubmit={handleLogin}>
+                            <div className="mb-4">
+                                <label className="block text-gray-300 mb-2" htmlFor="email">Email</label>
+                                <input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" required />
+                            </div>
+                            <div className="mb-6">
+                                <label className="block text-gray-300 mb-2" htmlFor="password">Senha</label>
+                                <input type="password" id="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" required />
+                            </div>
+                            {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+                            <button type="submit" className="w-full bg-purple-600 text-white py-2 rounded-md font-bold hover:bg-purple-700 transition-colors">Entrar</button>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        const AdminLayout = ({ children, setRoute, setUser }) => {
+            const handleLogout = async () => {
+                await auth.signOut();
+                setUser(null);
+                setRoute({ page: 'home' });
+            };
+
+            return (
+                <div className="flex min-h-screen bg-gray-900 text-white">
+                    <aside className="w-64 bg-gray-800 p-4 flex flex-col">
+                        <h2 className="text-2xl font-bold mb-8">Admin</h2>
+                        <nav className="flex flex-col space-y-2">
+                            <a onClick={() => setRoute({ page: 'admin-dashboard' })} className="px-4 py-2 rounded-md hover:bg-purple-600 cursor-pointer">Dashboard</a>
+                            <a onClick={() => setRoute({ page: 'admin-items' })} className="px-4 py-2 rounded-md hover:bg-purple-600 cursor-pointer">Itens (Scripts/Exec)</a>
+                            <a onClick={() => setRoute({ page: 'admin-games' })} className="px-4 py-2 rounded-md hover:bg-purple-600 cursor-pointer">Jogos</a>
+                            <a onClick={() => setRoute({ page: 'admin-partners' })} className="px-4 py-2 rounded-md hover:bg-purple-600 cursor-pointer">Parceiros</a>
+                            <a onClick={() => setRoute({ page: 'admin-how-to-use' })} className="px-4 py-2 rounded-md hover:bg-purple-600 cursor-pointer">Página "Como Usar"</a>
+                            <a onClick={() => setRoute({ page: 'admin-settings' })} className="px-4 py-2 rounded-md hover:bg-purple-600 cursor-pointer">Configurações</a>
+                        </nav>
+                        <button onClick={handleLogout} className="mt-auto w-full bg-red-600 text-white py-2 rounded-md font-bold hover:bg-red-700 transition-colors">Sair</button>
+                    </aside>
+                    <main className="flex-1 p-8 overflow-y-auto">
+                        {children}
+                    </main>
+                </div>
+            );
+        };
+
+        const AdminDashboard = () => {
+            const [stats, setStats] = useState({ items: 0, games: 0, partners: 0, clicks: 0 });
+
+            useEffect(() => {
+                const fetchStats = async () => {
+                    const itemsSnap = await db.collection("items").get();
+                    const gamesSnap = await db.collection("games").get();
+                    const partnersSnap = await db.collection("partners").get();
+                    
+                    let totalClicks = 0;
+                    itemsSnap.forEach(doc => {
+                        totalClicks += doc.data().clickCount || 0;
+                    });
+
+                    setStats({
+                        items: itemsSnap.size,
+                        games: gamesSnap.size,
+                        partners: partnersSnap.size,
+                        clicks: totalClicks
+                    });
+                };
+                fetchStats();
+            }, []);
+
+            return (
+                <div>
+                    <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="bg-gray-800 p-6 rounded-lg"><h3 className="text-lg text-gray-400">Total de Itens</h3><p className="text-4xl font-bold">{stats.items}</p></div>
+                        <div className="bg-gray-800 p-6 rounded-lg"><h3 className="text-lg text-gray-400">Total de Jogos</h3><p className="text-4xl font-bold">{stats.games}</p></div>
+                        <div className="bg-gray-800 p-6 rounded-lg"><h3 className="text-lg text-gray-400">Total de Parceiros</h3><p className="text-4xl font-bold">{stats.partners}</p></div>
+                        <div className="bg-gray-800 p-6 rounded-lg"><h3 className="text-lg text-gray-400">Total de Cliques</h3><p className="text-4xl font-bold">{stats.clicks}</p></div>
+                    </div>
+                </div>
+            );
         };
         
-        dom.comments.list.addEventListener('click', async (e) => {
-            const deleteBtn = e.target.closest('.delete-comment-btn');
-            if(deleteBtn && state.isAdmin) {
-                const { gameId, scriptId } = dom.comments.form.dataset;
-                const { commentId } = deleteBtn.dataset;
-                dom.confirm.title.textContent = "Excluir Comentário";
-                dom.confirm.text.textContent = "Tem certeza que deseja apagar este comentário?";
-                dom.confirm.modal.classList.remove('hidden');
-                dom.confirm.confirmBtn.onclick = async () => {
-                    try {
-                        await deleteDoc(doc(db, 'games', gameId, 'scripts', scriptId, 'comments', commentId));
-                        await updateDoc(doc(db, 'games', gameId, 'scripts', scriptId), { commentCount: increment(-1) });
-                    } catch (error) { console.error("Error deleting comment:", error); } finally { dom.confirm.modal.classList.add('hidden'); }
+        // --- COMPONENTES CRUD GENÉRICOS ---
+        // Para simplificar, vou criar um componente genérico para gerenciar Jogos e Parceiros
+        const AdminCrudManager = ({ collectionName, title, fields, setRoute }) => {
+            const [items, setItems] = useState([]);
+
+            const fetchData = async () => {
+                const snap = await db.collection(collectionName).orderBy("name").get();
+                setItems(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            };
+
+            useEffect(() => {
+                fetchData();
+            }, []);
+
+            const deleteItem = async (id) => {
+                if (window.confirm(`Tem certeza que deseja deletar este item?`)) {
+                    await db.collection(collectionName).doc(id).delete();
+                    fetchData();
                 }
-            }
-        });
-
-        // --- Sistema de Perfil e Animações ---
-        function setupLoginAnimations() {
-            const title = "Lures Scripts Premium";
-            dom.loginTitleContainer.innerHTML = title.split('').map((char, i) => 
-                `<span class="login-title-char" style="animation-delay: ${i * 0.05}s">${char === ' ' ? '&nbsp;' : char}</span>`
-            ).join('');
+            };
             
-            if (state.ledInterval) clearInterval(state.ledInterval);
+            return (
+                <div>
+                    <div className="flex justify-between items-center mb-8">
+                        <h1 className="text-3xl font-bold">{title}</h1>
+                        <button onClick={() => setRoute({ page: `admin-${collectionName}-form`, id: 'new' })} className="bg-green-600 px-4 py-2 rounded-md hover:bg-green-700">Adicionar Novo</button>
+                    </div>
+                    <div className="bg-gray-800 rounded-lg overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead><tr className="bg-gray-700">{fields.map(f => <th key={f.key} className="p-4">{f.label}</th>)}<th className="p-4">Ações</th></tr></thead>
+                            <tbody>
+                                {items.map(item => (
+                                    <tr key={item.id} className="border-b border-gray-700">
+                                        {fields.map(f => <td key={f.key} className="p-4 truncate" style={{maxWidth: '200px'}}>{item[f.key]}</td>)}
+                                        <td className="p-4 flex space-x-2">
+                                            <button onClick={() => setRoute({ page: `admin-${collectionName}-form`, id: item.id })} className="bg-blue-600 px-3 py-1 rounded-md text-xs hover:bg-blue-700">Editar</button>
+                                            <button onClick={() => deleteItem(item.id)} className="bg-red-600 px-3 py-1 rounded-md text-xs hover:bg-red-700">Deletar</button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        };
 
-            const words = [
-                { text: "Experiência Otimizada", color: "text-blue-400" },
-                { text: "Melhores Scripts", color: "text-green-400" },
-                { text: "Selecionado para Você", color: "text-yellow-400" },
-                { text: "Acesso Premium", color: "text-purple-400" },
-                { text: "Comunidade Ativa", color: "text-red-400" }
-            ];
-            let currentWordIndex = 0;
+        const AdminCrudForm = ({ collectionName, title, fields, id, setRoute }) => {
+            const [formData, setFormData] = useState({});
+            const isNew = id === 'new';
 
-            function cycleWords() {
-                const currentWordEl = dom.ledPanel.querySelector('.led-word');
-                if (currentWordEl) {
-                    currentWordEl.classList.remove('visible');
+            useEffect(() => {
+                const initialData = {};
+                fields.forEach(f => initialData[f.key] = f.default || '');
+                setFormData(initialData);
+
+                if (!isNew) {
+                    const fetchItem = async () => {
+                        const docRef = db.collection(collectionName).doc(id);
+                        const docSnap = await docRef.get();
+                        if (docSnap.exists) {
+                            setFormData(docSnap.data());
+                        }
+                    };
+                    fetchItem();
+                }
+            }, [id]);
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({ ...prev, [name]: value }));
+            };
+            
+            const generateSlug = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                let dataToSave = {...formData};
+                if(fields.some(f => f.key === 'slug')) {
+                    dataToSave.slug = generateSlug(formData.name);
                 }
 
-                setTimeout(() => {
-                    currentWordIndex = (currentWordIndex + 1) % words.length;
-                    const newWord = words[currentWordIndex];
-                    dom.ledPanel.innerHTML = `<span class="led-word ${newWord.color}">${newWord.text}</span>`;
-                    setTimeout(() => {
-                         const newWordEl = dom.ledPanel.querySelector('.led-word');
-                         if(newWordEl) newWordEl.classList.add('visible');
-                    }, 50);
-                }, 500); // Time for fade out
-            }
+                if (isNew) {
+                    await db.collection(collectionName).add(dataToSave);
+                } else {
+                    await db.collection(collectionName).doc(id).set(dataToSave, { merge: true });
+                }
+                setRoute({ page: `admin-${collectionName}` });
+            };
+
+            return (
+                <div>
+                    <h1 className="text-3xl font-bold mb-8">{isNew ? 'Adicionar' : 'Editar'} {title}</h1>
+                    <form onSubmit={handleSubmit} className="space-y-6 bg-gray-800 p-8 rounded-lg">
+                        {fields.map(field => (
+                            <div key={field.key}>
+                                <label className="block mb-2">{field.label}</label>
+                                <input type="text" name={field.key} value={formData[field.key] || ''} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md" required />
+                            </div>
+                        ))}
+                        <div className="flex justify-end space-x-4">
+                            <button type="button" onClick={() => setRoute({ page: `admin-${collectionName}` })} className="bg-gray-600 px-4 py-2 rounded-md hover:bg-gray-700">Cancelar</button>
+                            <button type="submit" className="bg-purple-600 px-4 py-2 rounded-md hover:bg-purple-700">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            );
+        };
+        
+        const AdminItems = ({ setRoute }) => {
+            const [items, setItems] = useState([]);
+
+            const fetchItems = async () => {
+                // FIX: Firestore index error fix
+                const q = db.collection("items");
+                const querySnapshot = await q.get();
+                const allItems = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                allItems.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
+                setItems(allItems);
+            };
+
+            useEffect(() => { fetchItems(); }, []);
+
+            const deleteItem = async (id) => {
+                if (window.confirm("Tem certeza que deseja deletar este item?")) {
+                    await db.collection("items").doc(id).delete();
+                    fetchItems();
+                }
+            };
+
+            return (
+                <div>
+                    <div className="flex justify-between items-center mb-8">
+                        <h1 className="text-3xl font-bold">Gerenciar Itens</h1>
+                        <button onClick={() => setRoute({ page: 'admin-item-form', id: 'new' })} className="bg-green-600 px-4 py-2 rounded-md hover:bg-green-700">Adicionar Novo</button>
+                    </div>
+                    <div className="bg-gray-800 rounded-lg overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead><tr className="bg-gray-700"><th className="p-4">Título</th><th className="p-4">Tipo</th><th className="p-4">Status</th><th className="p-4">Ações</th></tr></thead>
+                            <tbody>
+                                {items.map(item => (
+                                    <tr key={item.id} className="border-b border-gray-700">
+                                        <td className="p-4">{item.title}</td><td className="p-4">{item.type}</td><td className="p-4">{item.status}</td>
+                                        <td className="p-4 flex space-x-2">
+                                            <button onClick={() => setRoute({ page: 'admin-item-form', id: item.id })} className="bg-blue-600 px-3 py-1 rounded-md text-xs hover:bg-blue-700">Editar</button>
+                                            <button onClick={() => deleteItem(item.id)} className="bg-red-600 px-3 py-1 rounded-md text-xs hover:bg-red-700">Deletar</button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        };
+
+        const AdminItemForm = ({ id, setRoute }) => {
+            const [item, setItem] = useState({ type: 'script', title: '', slug: '', game: '', description: '', imageUrl: '', externalUrl: '', youtubeUrl: '', status: 'Atualizado', platforms: [], requiresKey: false });
+            const [games, setGames] = useState([]);
+            const isNew = id === 'new';
+
+            useEffect(() => {
+                const fetchGames = async () => {
+                    const gamesSnap = await db.collection("games").get();
+                    setGames(gamesSnap.docs.map(doc => doc.data().name));
+                };
+                fetchGames();
+
+                if (!isNew) {
+                    const fetchItem = async () => {
+                        const docRef = db.collection("items").doc(id);
+                        const docSnap = await docRef.get();
+                        if (docSnap.exists) {
+                            setItem({ ...docSnap.data(), id: docSnap.id });
+                        }
+                    };
+                    fetchItem();
+                }
+            }, [id]);
+
+            const handleChange = (e) => {
+                const { name, value, type, checked } = e.target;
+                if (name === "platforms") {
+                    const newPlatforms = checked ? [...item.platforms, value] : item.platforms.filter(p => p !== value);
+                    setItem(prev => ({ ...prev, platforms: newPlatforms }));
+                } else if (type === 'checkbox') {
+                    setItem(prev => ({ ...prev, [name]: checked }));
+                } else {
+                    setItem(prev => ({ ...prev, [name]: value }));
+                }
+            };
             
-            cycleWords(); // Initial call
-            state.ledInterval = setInterval(cycleWords, 3000); // Change word every 3 seconds
-        }
+            const generateSlug = (title) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
-        function generateAvatarUrl(seed, index = 0) {
-            const colors = ['00ffff', 'ff00ff', 'ffff00', '00ff00', 'ff0000', 'ffffff', 'ff8800', '8800ff'];
-            const bgColor = '0d1117';
-            const text = (seed ? seed[0] : 'U').toUpperCase();
-            const color = colors[index % colors.length];
-            return `https://placehold.co/100x100/${bgColor}/${color}?text=${text}&font=inter`;
-        }
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                const dataToSave = {
+                    ...item,
+                    slug: generateSlug(item.title),
+                    lastCheckedAt: new Date(),
+                };
+
+                if (isNew) {
+                    dataToSave.createdAt = new Date();
+                    dataToSave.clickCount = 0;
+                    await db.collection("items").add(dataToSave);
+                } else {
+                    const docRef = db.collection("items").doc(id);
+                    await docRef.set(dataToSave, { merge: true });
+                }
+                setRoute({ page: 'admin-items' });
+            };
+
+            return (
+                <div>
+                    <h1 className="text-3xl font-bold mb-8">{isNew ? 'Adicionar Novo Item' : 'Editar Item'}</h1>
+                    <form onSubmit={handleSubmit} className="space-y-6 bg-gray-800 p-8 rounded-lg">
+                        <div><label className="block mb-2">Tipo</label><select name="type" value={item.type} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md"><option value="script">Script</option><option value="executor">Executor</option></select></div>
+                        <div><label className="block mb-2">Título</label><input type="text" name="title" value={item.title} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md" required /></div>
+                        {item.type === 'script' && (<div><label className="block mb-2">Jogo</label><select name="game" value={item.game} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md"><option value="">Selecione um jogo</option>{games.map(g => <option key={g} value={g}>{g}</option>)}</select></div>)}
+                        <div><label className="block mb-2">Descrição</label><textarea name="description" value={item.description} onChange={handleChange} rows="4" className="w-full p-2 bg-gray-700 rounded-md"></textarea></div>
+                        <div><label className="block mb-2">URL da Imagem</label><input type="text" name="imageUrl" value={item.imageUrl} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md" placeholder="https://exemplo.com/imagem.png" required /></div>
+                        <div><label className="block mb-2">URL Externa (Download)</label><input type="text" name="externalUrl" value={item.externalUrl} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md" required /></div>
+                        <div><label className="block mb-2">URL do Vídeo (YouTube)</label><input type="text" name="youtubeUrl" value={item.youtubeUrl} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md" /></div>
+                        <div><label className="block mb-2">Status</label><select name="status" value={item.status} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md"><option value="Atualizado">Atualizado</option><option value="Desatualizado">Desatualizado</option></select></div>
+                        <div><label className="block mb-2">Plataformas</label><div className="flex space-x-4"><label><input type="checkbox" name="platforms" value="PC" checked={item.platforms?.includes('PC')} onChange={handleChange} /> PC</label><label><input type="checkbox" name="platforms" value="Android" checked={item.platforms?.includes('Android')} onChange={handleChange} /> Android</label><label><input type="checkbox" name="platforms" value="iOS" checked={item.platforms?.includes('iOS')} onChange={handleChange} /> iOS</label></div></div>
+                        <div><label className="block mb-2"><input type="checkbox" name="requiresKey" checked={item.requiresKey} onChange={handleChange} className="mr-2" />Requer Key</label></div>
+                        <div className="flex justify-end space-x-4"><button type="button" onClick={() => setRoute({ page: 'admin-items' })} className="bg-gray-600 px-4 py-2 rounded-md hover:bg-gray-700">Cancelar</button><button type="submit" className="bg-purple-600 px-4 py-2 rounded-md hover:bg-purple-700">Salvar</button></div>
+                    </form>
+                </div>
+            );
+        };
         
-        function populateProfileModal() {
-            dom.profile.nickname.value = state.userProfile.nickname || '';
-            dom.profile.avatarPreview.src = state.userProfile.avatarUrl || generateAvatarUrl(state.activeKey);
-            const gallery = dom.profile.avatarGallery;
-            gallery.innerHTML = '';
-            for (let i = 0; i < 16; i++) {
-                const avatarUrl = generateAvatarUrl(state.activeKey, i);
-                const img = document.createElement('img');
-                img.src = avatarUrl;
-                img.dataset.url = avatarUrl;
-                img.className = `w-16 h-16 rounded-full avatar-option ${avatarUrl === state.userProfile.avatarUrl ? 'selected' : ''}`;
-                gallery.appendChild(img);
-            }
-        }
+        const AdminSettings = ({ setRoute }) => {
+            const [settings, setSettings] = useState({ siteName: '', socialLinks: [] });
 
-        function selectAvatar(avatarElement) {
-            dom.profile.avatarGallery.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
-            avatarElement.classList.add('selected');
-            dom.profile.avatarPreview.src = avatarElement.dataset.url;
-        }
+            useEffect(() => {
+                const fetchSettings = async () => {
+                    const docRef = db.collection("siteSettings").doc("config");
+                    const docSnap = await docRef.get();
+                    if (docSnap.exists) {
+                        setSettings(docSnap.data());
+                    }
+                };
+                fetchSettings();
+            }, []);
 
-        async function loadUserProfile(key) {
-            if (state.isAdmin || !key) { state.userProfile = { nickname: 'Admin', avatarUrl: generateAvatarUrl('A') }; return; };
-            const profileRef = doc(db, 'profiles', key);
-            const profileSnap = await getDoc(profileRef);
-            if (profileSnap.exists()) {
-                state.userProfile = profileSnap.data();
-            } else {
-                const defaultProfile = { nickname: `User-${key.substring(6, 11)}`, avatarUrl: generateAvatarUrl(key, 0) };
-                await setDoc(profileRef, defaultProfile);
-                state.userProfile = defaultProfile;
-            }
-        }
+            const handleLinkChange = (index, field, value) => {
+                const newLinks = [...settings.socialLinks];
+                newLinks[index][field] = value;
+                setSettings(prev => ({ ...prev, socialLinks: newLinks }));
+            };
+
+            const addLink = () => {
+                setSettings(prev => ({ ...prev, socialLinks: [...prev.socialLinks, { name: '', url: '' }] }));
+            };
+
+            const removeLink = (index) => {
+                const newLinks = settings.socialLinks.filter((_, i) => i !== index);
+                setSettings(prev => ({ ...prev, socialLinks: newLinks }));
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                await db.collection("siteSettings").doc("config").set(settings, { merge: true });
+                alert('Configurações salvas!');
+                setRoute({ page: 'admin-dashboard' });
+            };
+
+            return (
+                <div>
+                    <h1 className="text-3xl font-bold mb-8">Configurações do Site</h1>
+                    <form onSubmit={handleSubmit} className="space-y-6 bg-gray-800 p-8 rounded-lg">
+                        <div>
+                            <label className="block mb-2">Nome do Site</label>
+                            <input type="text" value={settings.siteName} onChange={e => setSettings(prev => ({ ...prev, siteName: e.target.value }))} className="w-full p-2 bg-gray-700 rounded-md" />
+                        </div>
+                        <div>
+                            <label className="block mb-2">Links Sociais</label>
+                            {settings.socialLinks?.map((link, index) => (
+                                <div key={index} className="flex items-center space-x-2 mb-2">
+                                    <input type="text" placeholder="Nome (ex: YouTube)" value={link.name} onChange={e => handleLinkChange(index, 'name', e.target.value)} className="w-1/3 p-2 bg-gray-700 rounded-md" />
+                                    <input type="text" placeholder="URL" value={link.url} onChange={e => handleLinkChange(index, 'url', e.target.value)} className="w-2/3 p-2 bg-gray-700 rounded-md" />
+                                    <button type="button" onClick={() => removeLink(index)} className="bg-red-600 p-2 rounded-md">X</button>
+                                </div>
+                            ))}
+                            <button type="button" onClick={addLink} className="bg-green-600 px-4 py-2 rounded-md mt-2">Adicionar Link</button>
+                        </div>
+                        <div className="flex justify-end"><button type="submit" className="bg-purple-600 px-4 py-2 rounded-md hover:bg-purple-700">Salvar Configurações</button></div>
+                    </form>
+                </div>
+            );
+        };
         
-        function updateUIAfterProfileChange() {
-            if (state.isAdmin) return;
-            document.getElementById('sidebar-avatar').src = state.userProfile.avatarUrl;
-            document.getElementById('sidebar-nickname').textContent = state.userProfile.nickname;
+        const AdminHowToUseForm = ({ setRoute }) => {
+            const [pageData, setPageData] = useState({ title: '', description: '', youtubeUrl: '' });
+
+            useEffect(() => {
+                const fetchPage = async () => {
+                    const docRef = db.collection("pages").doc("how-to-use");
+                    const docSnap = await docRef.get();
+                    if (docSnap.exists) {
+                        setPageData(docSnap.data());
+                    }
+                };
+                fetchPage();
+            }, []);
+            
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setPageData(prev => ({...prev, [name]: value}));
+            };
+            
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                await db.collection("pages").doc("how-to-use").set(pageData, { merge: true });
+                alert('Página salva!');
+                setRoute({ page: 'admin-dashboard' });
+            };
+            
+            return (
+                <div>
+                    <h1 className="text-3xl font-bold mb-8">Editar Página "Como Usar"</h1>
+                    <form onSubmit={handleSubmit} className="space-y-6 bg-gray-800 p-8 rounded-lg">
+                        <div><label className="block mb-2">Título</label><input type="text" name="title" value={pageData.title} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md" /></div>
+                        <div><label className="block mb-2">Descrição (pode usar tags HTML como `&lt;strong&gt;` e `&lt;br /&gt;`)</label><textarea name="description" value={pageData.description} onChange={handleChange} rows="6" className="w-full p-2 bg-gray-700 rounded-md"></textarea></div>
+                        <div><label className="block mb-2">URL do Vídeo (YouTube)</label><input type="text" name="youtubeUrl" value={pageData.youtubeUrl} onChange={handleChange} className="w-full p-2 bg-gray-700 rounded-md" /></div>
+                        <div className="flex justify-end"><button type="submit" className="bg-purple-600 px-4 py-2 rounded-md hover:bg-purple-700">Salvar Página</button></div>
+                    </form>
+                </div>
+            );
+        };
+
+        // --- COMPONENTE PRINCIPAL E ROTEAMENTO ---
+
+        function App() {
+            const [route, setRoute] = useState({ page: 'home' });
+            const [user, setUser] = useState(null);
+            const [loadingAuth, setLoadingAuth] = useState(true);
+            const [siteSettings, setSiteSettings] = useState({});
+            const [games, setGames] = useState([]);
+
+            useEffect(() => {
+                if (!auth) return; // Garante que o firebase está inicializado
+                const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+                    setUser(currentUser);
+                    setLoadingAuth(false);
+                });
+                return () => unsubscribe();
+            }, []);
+
+            useEffect(() => {
+                if (!db) return; // Garante que o firebase está inicializado
+                const fetchInitialData = async () => {
+                    const settingsRef = db.collection("siteSettings").doc("config");
+                    const settingsSnap = await settingsRef.get();
+                    if (settingsSnap.exists) {
+                        setSiteSettings(settingsSnap.data());
+                    } else {
+                        setSiteSettings({ siteName: "Rony Scripts", socialLinks: [] });
+                    }
+
+                    const gamesQuery = db.collection("games").orderBy("name");
+                    const gamesSnap = await gamesQuery.get();
+                    setGames(gamesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                };
+                fetchInitialData();
+            }, [route]); // Re-fetch on route change to keep nav updated
+
+            const renderPage = () => {
+                if (!auth || !db) {
+                     return <div style="color: red; text-align: center; padding-top: 50px;">Aguardando inicialização do Firebase...</div>;
+                }
+                // Rota de Admin Login
+                if (window.location.hash === '#/admin' && !user) {
+                    if (loadingAuth) return <div className="text-white text-center py-20">Verificando autenticação...</div>;
+                    return <AdminLogin setUser={setUser} />;
+                }
+
+                // Rotas de Admin
+                if (window.location.hash.startsWith('#/admin') && user) {
+                    const adminPage = route.page.split('admin-')[1] || 'dashboard';
+                    
+                    return (
+                        <AdminLayout setRoute={setRoute} setUser={setUser}>
+                            {adminPage === 'dashboard' && <AdminDashboard />}
+                            {adminPage === 'items' && <AdminItems setRoute={setRoute} />}
+                            {adminPage === 'item-form' && <AdminItemForm id={route.id} setRoute={setRoute} />}
+                            {adminPage === 'games' && <AdminCrudManager collectionName="games" title="Gerenciar Jogos" fields={[{key: 'name', label: 'Nome'}]} setRoute={setRoute} />}
+                            {adminPage === 'games-form' && <AdminCrudForm collectionName="games" title="Jogo" fields={[{key: 'name', label: 'Nome'}]} id={route.id} setRoute={setRoute} />}
+                            {adminPage === 'partners' && <AdminCrudManager collectionName="partners" title="Gerenciar Parceiros" fields={[{key: 'name', label: 'Nome'}, {key: 'url', label: 'URL'}]} setRoute={setRoute} />}
+                            {adminPage === 'partners-form' && <AdminCrudForm collectionName="partners" title="Parceiro" fields={[{key: 'name', label: 'Nome'}, {key: 'description', label: 'Descrição'}, {key: 'imageUrl', label: 'URL da Imagem'}, {key: 'url', label: 'URL do Parceiro'}]} id={route.id} setRoute={setRoute} />}
+                            {adminPage === 'how-to-use' && <AdminHowToUseForm setRoute={setRoute} />}
+                            {adminPage === 'settings' && <AdminSettings setRoute={setRoute} />}
+                        </AdminLayout>
+                    );
+                }
+
+                // Rotas Públicas
+                return (
+                    <>
+                        <Header setRoute={setRoute} siteSettings={siteSettings} games={games} />
+                        <main>
+                            {route.page === 'home' && <HomePage setRoute={setRoute} />}
+                            {route.page === 'executors' && <ExecutorsPage setRoute={setRoute} />}
+                            {route.page === 'game' && <GamePage slug={route.slug} setRoute={setRoute} />}
+                            {route.page === 'item' && <ItemPage slug={route.slug} />}
+                            {route.page === 'how-to-use' && <HowToUsePage />}
+                            {route.page === 'partners' && <PartnersPage />}
+                        </main>
+                        <Footer siteSettings={siteSettings} />
+                    </>
+                );
+            };
+            
+            // Roteamento simples baseado em hash
+            useEffect(() => {
+                const handleHashChange = () => {
+                    const hash = window.location.hash.replace('#/', '');
+                    const [page, slug] = hash.split('/');
+                    
+                    if (page === 'admin') {
+                        setRoute({ page: `admin-${slug || 'dashboard'}` });
+                    } else if (page === 'game') {
+                        setRoute({ page: 'game', slug });
+                    } else if (page === 'item') {
+                        setRoute({ page: 'item', slug });
+                    } else if (['executors', 'how-to-use', 'partners'].includes(page)) {
+                        setRoute({ page });
+                    } else {
+                        setRoute({ page: 'home' });
+                    }
+                };
+
+                window.addEventListener('hashchange', handleHashChange);
+                handleHashChange(); // Initial route
+                
+                return () => window.removeEventListener('hashchange', handleHashChange);
+            }, []);
+
+
+            return (
+                <div className="bg-gray-900 min-h-screen text-white font-sans">
+                    {renderPage()}
+                </div>
+            );
         }
 
-        // --- Funções Auxiliares ---
-        function toggleOrderMode(type) {
-            const listElement = document.getElementById(`${type}-list`);
-            const orderControls = dom.adminPanel.querySelector('#order-controls');
-            if (state.sortableInstances[type]) {
-                state.sortableInstances[type].destroy();
-                state.sortableInstances[type] = null;
-                orderControls.classList.add('hidden');
-                listElement.classList.remove('border-2', 'border-dashed', 'border-blue-500', 'p-2');
-            } else {
-                orderControls.classList.remove('hidden');
-                listElement.classList.add('border-2', 'border-dashed', 'border-blue-500', 'p-2');
-                state.sortableInstances[type] = new Sortable(listElement, { animation: 150, ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen' });
-                dom.adminPanel.querySelector('#save-order').onclick = () => saveOrder(type, listElement);
-                dom.adminPanel.querySelector('#cancel-order').onclick = () => { toggleOrderMode(type); renderSidebar(); };
-            }
-        }
-        
-        async function saveOrder(type, listElement) {
-            const collectionName = type === 'game' ? 'games' : 'executors';
-            const batch = writeBatch(db);
-            listElement.querySelectorAll('.nav-item').forEach((item, index) => {
-                batch.update(doc(db, collectionName, item.dataset.id), { order: index });
-            });
-            try { await batch.commit(); } catch(e) { console.error("Failed to save order", e); } finally { toggleOrderMode(type); }
-        }
-
-        // --- Inicialização ---
-        init();
+        ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
 </html>
