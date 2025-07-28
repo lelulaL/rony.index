@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lures Scripts Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <style>
+        :root { 
+            --accent-color: #3b82f6; 
+            --accent-glow: rgba(59, 130, 246, 0.4);
+            --bg-primary: #010409;
+            --bg-secondary: #0d1117;
+            --bg-tertiary: #161b22;
+        }
+        
+        @keyframes move-stars { from { background-position: 0 0; } to { background-position: -10000px 5000px; } }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-primary);
+            color: #c9d1d9; 
+            overflow: hidden; 
+        }
+        .stars-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background-image: 
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><circle fill="%23161b22" cx="100" cy="100" r="1.2"/></svg>'),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600"><circle fill="%230d1117" cx="300" cy="300" r="0.8"/></svg>');
+            animation: move-stars 300s linear infinite;
+        }
+        
+        .admin-only, .admin-only-inline { display: none !important; }
+        body.is-admin .admin-only { display: flex !important; }
+        body.is-admin .admin-only-inline { display: inline-flex !important; }
+
+        .fade-in { animation: fadeIn 0.8s ease-in-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        
+        .glow-on-hover:hover { box-shadow: 0 0 20px var(--accent-glow); }
+
+        .sortable-ghost { opacity: 0.4; background-color: rgba(59, 130, 246, 0.2); border: 2px dashed var(--accent-color); }
+        .sortable-chosen { cursor: grabbing; transform: scale(1.02); box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #22272e; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #333942; }
+
+        .skeleton { animation: pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        
+        .nav-item.active { background-color: rgba(59, 130, 246, 0.15); color: white; position: relative; }
+        .nav-item.active::before { content: ''; position: absolute; left: -4px; top: 15%; height: 70%; width: 4px; background-color: var(--accent-color); border-radius: 0 4px 4px 0; box-shadow: 0 0 10px var(--accent-color); }
+        
+        .avatar-option { cursor: pointer; border: 2px solid transparent; transition: all 0.2s ease-in-out; }
+        .avatar-option.selected { border-color: var(--accent-color); box-shadow: 0 0 15px var(--accent-glow); transform: scale(1.1); }
+
+        /* Animações de Login Refinadas */
+        @keyframes gentle-wave {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .login-title-char {
+            display: inline-block;
+            animation: gentle-wave 2.5s ease-in-out infinite;
+            text-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        .led-panel {
+            background: #000;
+            padding: 8px 0;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px #000;
+            border: 1px solid #222;
+            height: 40px; /* Altura fixa para o painel */
+            position: relative;
+        }
+        .led-word {
+            position: absolute;
+            width: 100%;
+            left: 0;
+            text-align: center;
+            font-family: monospace;
+            font-size: 1.125rem; /* text-lg */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .led-word.visible {
+            opacity: 1;
+        }
+
+        @keyframes rotate-rgb { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .rgb-border {
+            position: relative;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .rgb-border::before {
+            content: '';
+            position: absolute;
+            z-index: -1;
+            left: -50%;
+            top: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, #89f7fe, #66a6ff, #a283ff, #ff83b5, #ff8383, #f7d389, #89f7fe);
+            animation: rotate-rgb 4s linear infinite;
+        }
+
+        #main-content { overflow-y: auto; height: 100vh; }
+        .script-card {
+            background-color: var(--bg-tertiary);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .script-card:hover {
+            transform: scale(1.03);
+            z-index: 20;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px var(--accent-glow);
+        }
+        .script-card-img { width: 100%; height: 160px; object-fit: cover; }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="stars-bg"></div>
+
+    <!-- Telas Iniciais -->
+    <div id="loading-screen" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[100] p-4">
+        <div class="text-white text-xl animate-pulse">Carregando Plataforma...</div>
+    </div>
+
+    <!-- LOGIN ATUALIZADO -->
+    <div id="login-screen" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[90] p-4">
+        <div class="w-full max-w-md rounded-2xl shadow-2xl shadow-black/50 fade-in rgb-border p-1">
+            <div class="w-full h-full bg-gray-900/95 rounded-xl p-8 text-center">
+                <img src="https://i.ibb.co/Fkdd31VP/download.jpg" onerror="this.onerror=null;this.src='https://placehold.co/256x256/0d1117/3b82f6?text=L&font=inter'" alt="Logo" class="w-24 h-24 mx-auto rounded-full mb-4 border-2 border-blue-500">
+                <h1 id="login-title-container" class="text-3xl font-black text-white mb-4"></h1>
+                <div id="led-panel" class="led-panel rounded-md mb-6"></div>
+                <p class="text-gray-400 mb-6">Insira sua chave de acesso ou a senha de administrador.</p>
+                <form id="login-form" class="space-y-4">
+                    <input type="password" id="access-key" placeholder="Sua Chave ou Senha" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-center transition-all duration-300">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg shadow-blue-600/30 transition-all duration-300 transform hover:scale-105 glow-on-hover">Entrar</button>
+                </form>
+                <p id="login-error" class="text-red-400 text-sm mt-4 h-5"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estrutura Principal da Aplicação -->
+    <div id="app-container" class="hidden relative min-h-screen">
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-30 hidden md:hidden"></div>
+        <aside id="main-sidebar" class="fixed inset-y-0 left-0 z-40 w-72 bg-gray-900/95 backdrop-blur-sm border-r border-gray-800 flex flex-col p-4 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+            <button id="menu-close-btn" class="md:hidden absolute top-2 right-2 text-2xl p-2 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-times"></i>
+            </button>
+            <header class="flex items-center gap-3 mb-4 p-2 cursor-pointer" id="home-btn">
+                <img src="https://i.ibb.co/Fkdd31VP/download.jpg" onerror="this.onerror=null;this.src='https://placehold.co/256x256/0d1117/3b82f6?text=L&font=inter'" alt="Logo" class="w-10 h-10 rounded-full border-2 border-blue-500">
+                <h1 class="text-xl font-bold text-white">Lures Scripts</h1>
+            </header>
+            <div class="relative mb-4 px-1">
+                <input type="search" id="global-search-bar" placeholder="Pesquisar..." class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 pl-9 pr-3 text-sm focus:ring-1 focus:ring-blue-500 outline-none transition-all">
+                <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
+            </div>
+            <nav id="main-nav" class="flex-grow overflow-y-auto space-y-2 pr-2"></nav>
+            <div id="admin-panel" class="admin-only mt-auto pt-4 border-t border-gray-800 space-y-2"></div>
+            <div id="user-panel" class="mt-4 pt-4 border-t border-gray-800 flex items-center justify-between gap-2"></div>
+        </aside>
+        <main id="main-content" class="w-full md:ml-72 p-6 sm:p-8">
+             <header class="md:hidden flex items-center justify-between mb-6">
+                <button id="menu-toggle-btn" class="text-2xl p-2 text-gray-300">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1 class="text-xl font-bold text-white">Lures Scripts</h1>
+                <div class="w-8"></div> <!-- Spacer -->
+            </header>
+            <div id="content-wrapper"></div>
+        </main>
+    </div>
+    
+    <!-- Modais -->
+    <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50 hidden"><div class="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-6 w-full max-w-lg max-h-[90vh] flex flex-col"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold">Meu Perfil</h3><button class="cancel-modal-btn text-gray-400 hover:text-white text-2xl">&times;</button></div><div class="flex-grow overflow-y-auto pr-2"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="md:col-span-1"><h4 class="text-lg font-semibold mb-4">Gerenciar Perfil</h4><form id="profile-form" class="space-y-4"><img id="profile-avatar-preview" src="" class="w-24 h-24 rounded-full mx-auto mb-4 border-2 border-blue-500"><div><label for="profile-nickname" class="block text-sm font-medium text-gray-300 mb-1">Apelido</label><input type="text" id="profile-nickname" placeholder="Seu apelido único" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"></div><button type="submit" class="w-full bg-green-600 hover:bg-green-500 text-white font-semibold py-2 rounded-lg">Salvar Perfil</button></form></div><div class="md:col-span-1"><h4 class="text-lg font-semibold mb-4">Escolha seu Avatar</h4><div id="avatar-gallery" class="grid grid-cols-4 gap-3 bg-black/20 p-3 rounded-md"></div></div></div></div></div></div>
+    <div id="key-manager-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 hidden"><div class="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] flex flex-col"><div class="flex justify-between items-center mb-4"><h3 class="text-2xl font-bold">Gerenciador de Chaves</h3><button class="cancel-modal-btn text-gray-400 hover:text-white text-2xl">&times;</button></div><form id="generate-key-form" class="flex gap-2 mb-4"><input type="text" id="key-id-name" placeholder="Nome de Identificação (Ex: Luan Neves)" class="flex-grow bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white" required><button type="submit" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105">Gerar Nova Chave</button></form><div id="key-list" class="overflow-y-auto space-y-2 pr-2 bg-black/20 p-2 rounded-md"></div></div></div>
+    <div id="game-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 hidden"><div class="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-8 w-full max-w-md"><h3 class="text-2xl font-bold mb-6" id="game-modal-title"></h3><form id="game-form"><input type="hidden" id="game-id"><label for="game-name" class="block text-sm font-medium text-gray-300 mb-2">Nome do Jogo</label><input type="text" id="game-name" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white" required><div class="flex justify-end gap-4 mt-8"><button type="button" class="cancel-modal-btn px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700">Cancelar</button><button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">Salvar</button></div></form></div></div>
+    <div id="script-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 hidden"><div class="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-8 w-full max-w-2xl max-h-[95vh] flex flex-col"><h3 class="text-2xl font-bold mb-6" id="script-modal-title"></h3><form id="script-form" class="space-y-4 overflow-y-auto pr-2"><input type="hidden" id="script-id"><input type="hidden" id="script-game-id"><div><label for="script-title" class="block text-sm font-medium">Título</label><input type="text" id="script-title" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white" required></div><div><label for="script-image-url" class="block text-sm font-medium">URL da Imagem</label><input type="url" id="script-image-url" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"></div><div><label for="script-description" class="block text-sm font-medium">Descrição</label><textarea id="script-description" rows="2" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"></textarea></div><div><label for="script-code" class="block text-sm font-medium">Código</label><textarea id="script-code" rows="5" class="w-full bg-black/50 border border-gray-700 rounded-lg p-3 text-white font-mono text-sm"></textarea></div><div class="flex gap-4"><div class="flex-1"><label for="script-status" class="block text-sm font-medium">Status</label><select id="script-status" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"><option value="verificado">✅ Verificado</option><option value="teste">⚠️ Em Teste</option><option value="obsoleto">❌ Obsoleto</option></select></div><div class="flex-1"><label class="block text-sm font-medium text-gray-300 mb-2">Destaque</label><label class="flex items-center gap-2 bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white cursor-pointer"><input type="checkbox" id="script-featured" class="w-4 h-4 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-600"><span>Marcar como Destaque</span></label></div></div><div class="flex justify-end gap-4 mt-8 pt-4 border-t border-gray-800"><button type="button" class="cancel-modal-btn px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700">Cancelar</button><button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">Salvar</button></div></form></div></div>
+    <div id="executor-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 hidden"><div class="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-8 w-full max-w-2xl"><h3 class="text-2xl font-bold mb-6" id="executor-modal-title"></h3><form id="executor-form" class="space-y-4"><input type="hidden" id="executor-id"><div><label for="executor-name" class="block text-sm font-medium">Nome</label><input type="text" id="executor-name" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white" required></div><div><label for="executor-image-url" class="block text-sm font-medium">URL da Imagem</label><input type="url" id="executor-image-url" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"></div><div><label for="executor-description" class="block text-sm font-medium">Descrição</label><textarea id="executor-description" rows="3" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"></textarea></div><div><label for="executor-download-url" class="block text-sm font-medium">URL de Download</label><input type="url" id="executor-download-url" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white" placeholder="https://www.mediafire.com/..." required></div><div><label for="executor-device" class="block text-sm font-medium">Dispositivo</label><select id="executor-device" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white"><option value="pc">PC 💻</option><option value="mobile">Mobile 📱</option><option value="both">Ambos 💻📱</option></select></div><div class="flex justify-end gap-4 mt-8"><button type="button" class="cancel-modal-btn px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700">Cancelar</button><button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">Salvar</button></div></form></div></div>
+    <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-[60] hidden"><div class="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-8 w-full max-w-md text-center"><h3 class="text-xl font-bold mb-4" id="confirm-modal-title"></h3><p id="confirm-modal-text" class="text-gray-300 mb-8"></p><div class="flex justify-center gap-4"><button id="confirm-modal-cancel" class="px-6 py-2 rounded-lg text-gray-300 bg-gray-700 hover:bg-gray-600">Cancelar</button><button id="confirm-modal-confirm" class="px-6 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold">Confirmar</button></div></div></div>
+    <div id="comments-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 hidden"><div class="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] flex flex-col"><div class="flex justify-between items-center mb-4"><h3 class="text-2xl font-bold" id="comments-modal-title">Comentários</h3><button class="cancel-modal-btn text-gray-400 hover:text-white text-2xl">&times;</button></div><div id="comments-list" class="flex-grow overflow-y-auto space-y-4 pr-2 bg-black/20 p-4 rounded-md mb-4"></div><form id="comment-form" class="flex gap-3"><input type="text" id="comment-input" placeholder="Deixe seu feedback..." class="flex-grow bg-gray-800 border border-gray-600 rounded-lg px-4 py-2" required><button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-5 py-2 rounded-lg">Enviar</button></form></div></div>
+
+    <!-- Módulo JavaScript -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, collection, onSnapshot, updateDoc, deleteDoc, query, getDoc, setDoc, getDocs, writeBatch, orderBy, addDoc, increment, runTransaction, serverTimestamp, arrayRemove, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // --- Configuração e Constantes ---
+        const ADMIN_PASSWORD = "luresadminscripts";
+        const firebaseConfig = {
+          apiKey: "AIzaSyC_eNoNlkjFrlJP_wLCb-vU7x2wrPZIjyI",
+          authDomain: "premium-lures.firebaseapp.com",
+          projectId: "premium-lures",
+          storageBucket: "premium-lures.appspot.com",
+          messagingSenderId: "74594132787",
+          appId: "1:74594132787:web:60319b79328c9156295446",
+          measurementId: "G-S1KE7ETDGX"
+        };
+        
+        // --- Inicialização Firebase ---
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        // --- Referências DOM ---
+        const dom = {
+            loadingScreen: document.getElementById('loading-screen'),
+            loginScreen: document.getElementById('login-screen'),
+            loginForm: document.getElementById('login-form'),
+            accessKeyInput: document.getElementById('access-key'),
+            loginError: document.getElementById('login-error'),
+            loginTitleContainer: document.getElementById('login-title-container'),
+            ledPanel: document.getElementById('led-panel'),
+            appContainer: document.getElementById('app-container'),
+            homeBtn: document.getElementById('home-btn'),
+            mainNav: document.getElementById('main-nav'),
+            mainContent: document.getElementById('main-content'),
+            contentWrapper: document.getElementById('content-wrapper'),
+            adminPanel: document.getElementById('admin-panel'),
+            userPanel: document.getElementById('user-panel'),
+            globalSearchBar: document.getElementById('global-search-bar'),
+            sidebar: document.getElementById('main-sidebar'),
+            sidebarOverlay: document.getElementById('sidebar-overlay'),
+            menuToggleBtn: document.getElementById('menu-toggle-btn'),
+            menuCloseBtn: document.getElementById('menu-close-btn'),
+            keyManager: { modal: document.getElementById('key-manager-modal'), list: document.getElementById('key-list'), form: document.getElementById('generate-key-form'), idNameInput: document.getElementById('key-id-name') },
+            game: { modal: document.getElementById('game-modal'), form: document.getElementById('game-form'), id: document.getElementById('game-id'), name: document.getElementById('game-name'), title: document.getElementById('game-modal-title') },
+            script: { modal: document.getElementById('script-modal'), form: document.getElementById('script-form'), id: document.getElementById('script-id'), gameId: document.getElementById('script-game-id'), title: document.getElementById('script-title'), imageUrl: document.getElementById('script-image-url'), description: document.getElementById('script-description'), code: document.getElementById('script-code'), status: document.getElementById('script-status'), featured: document.getElementById('script-featured'), modalTitle: document.getElementById('script-modal-title') },
+            executor: { modal: document.getElementById('executor-modal'), form: document.getElementById('executor-form'), id: document.getElementById('executor-id'), name: document.getElementById('executor-name'), imageUrl: document.getElementById('executor-image-url'), description: document.getElementById('executor-description'), downloadUrl: document.getElementById('executor-download-url'), device: document.getElementById('executor-device'), title: document.getElementById('executor-modal-title') },
+            confirm: { modal: document.getElementById('confirm-modal'), title: document.getElementById('confirm-modal-title'), text: document.getElementById('confirm-modal-text'), confirmBtn: document.getElementById('confirm-modal-confirm'), cancelBtn: document.getElementById('confirm-modal-cancel') },
+            comments: { modal: document.getElementById('comments-modal'), title: document.getElementById('comments-modal-title'), list: document.getElementById('comments-list'), form: document.getElementById('comment-form'), input: document.getElementById('comment-input')},
+            profile: { modal: document.getElementById('profile-modal'), form: document.getElementById('profile-form'), nickname: document.getElementById('profile-nickname'), avatarPreview: document.getElementById('profile-avatar-preview'), avatarGallery: document.getElementById('avatar-gallery') }
+        };
+        
+        // --- Estado da Aplicação ---
+        let state = {
+            isAdmin: false,
+            activeView: null,
+            selectedItemId: null,
+            sortableInstances: {},
+            unsubscribeListeners: [],
+            activeKey: null,
+            userProfile: {},
+            ledInterval: null,
+        };
+
+        // --- Funções de Inicialização e Autenticação ---
+        function init() {
+            setupEventListeners();
+            checkSession();
+            setupLoginAnimations();
+        }
+
+        async function checkSession() {
+            const isAdmin = localStorage.getItem('isAdmin') === 'true';
+            const activeKey = sessionStorage.getItem('activeKey');
+
+            try {
+                await signInAnonymously(auth);
+                if (isAdmin) {
+                    state.isAdmin = true;
+                    state.activeKey = 'admin';
+                    enterApp();
+                    return;
+                }
+
+                if (activeKey) {
+                    const keyRef = doc(db, 'keys', activeKey);
+                    const keySnap = await getDoc(keyRef);
+                    if (keySnap.exists()) {
+                        state.isAdmin = false;
+                        state.activeKey = activeKey;
+                        await loadUserProfile(activeKey);
+                        enterApp();
+                    } else {
+                        logout();
+                    }
+                } else {
+                    dom.loadingScreen.classList.add('hidden');
+                    dom.loginScreen.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Authentication or session check failed:", error);
+                dom.loadingScreen.classList.add('hidden');
+                dom.loginScreen.classList.remove('hidden');
+                dom.loginError.textContent = "Erro de conexão. Tente novamente.";
+            }
+        }
+
+        dom.loginForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const input = dom.accessKeyInput.value.trim();
+            dom.loginError.textContent = '';
+            if (!input) return;
+
+            if (input === ADMIN_PASSWORD) {
+                state.isAdmin = true;
+                state.activeKey = 'admin';
+                localStorage.setItem('isAdmin', 'true');
+                sessionStorage.setItem('activeKey', 'admin');
+                enterApp();
+                return;
+            }
+            
+            const keyRef = doc(db, 'keys', input);
+            try {
+                const keyDoc = await getDoc(keyRef);
+                if (!keyDoc.exists()) {
+                    throw new Error("Chave de acesso inválida!");
+                }
+                
+                state.isAdmin = false;
+                state.activeKey = input;
+                sessionStorage.setItem('activeKey', input);
+                await loadUserProfile(input);
+                enterApp();
+            } catch (error) {
+                console.error("Login failed:", error);
+                dom.loginError.textContent = error.message;
+            }
+        };
+
+        function enterApp() {
+            dom.loadingScreen.classList.add('hidden');
+            document.body.classList.toggle('is-admin', state.isAdmin);
+            dom.loginScreen.classList.add('hidden');
+            dom.appContainer.classList.remove('hidden');
+            dom.appContainer.classList.add('flex');
+            renderSidebar();
+            renderWelcome();
+        }
+
+        function logout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.reload();
+        }
+
+        // --- Renderização da UI ---
+        function renderSidebar() {
+            dom.mainNav.innerHTML = `
+                <div id="executors-nav-section">
+                     <div class="nav-item group flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-200" data-type="executors" data-id="executors-tab">
+                        <i class="fa-solid fa-bolt fa-fw text-purple-400"></i><span class="font-medium">Lures Executores</span>
+                    </div>
+                </div>
+                <div id="games-nav-section">
+                    <div class="flex justify-between items-center pr-2">
+                        <h3 class="px-3 pt-4 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Scripts por Jogo</h3>
+                        ${state.isAdmin ? `<button data-type="game" class="order-btn text-gray-500 hover:text-white text-xs p-1"><i class="fa-solid fa-sort"></i></button>` : ''}
+                    </div>
+                    <div id="game-list" class="space-y-1">${renderNavSkeleton(4)}</div>
+                </div>`;
+            
+            loadNavItems('games', 'game-list', createGameNavListItem, 'game');
+            
+            if (state.isAdmin) {
+                dom.adminPanel.innerHTML = `
+                    <div id="order-controls" class="hidden flex gap-2"><button id="save-order" class="w-full bg-green-600/80 hover:bg-green-600 p-2 rounded-md text-sm">Salvar Ordem</button><button id="cancel-order" class="w-full bg-red-600/80 hover:bg-red-600 p-2 rounded-md text-sm">Cancelar</button></div>
+                    <button class="admin-btn bg-blue-600/20 text-blue-300" data-type="game"><i class="fa-solid fa-gamepad fa-fw"></i> Adicionar Jogo</button>
+                    <button class="admin-btn bg-yellow-600/20 text-yellow-300" data-type="key"><i class="fa-solid fa-key fa-fw"></i> Gerenciar Chaves</button>
+                `;
+                dom.adminPanel.querySelectorAll('.admin-btn').forEach(btn => btn.onclick = () => openModal(btn.dataset.type));
+                dom.mainNav.querySelectorAll('.order-btn').forEach(btn => btn.onclick = () => toggleOrderMode('game'));
+            }
+            
+            dom.userPanel.innerHTML = `
+                <button id="profile-btn" class="flex items-center gap-2 text-gray-300 hover:text-white transition-colors" title="Meu Perfil">
+                    <img id="sidebar-avatar" src="${state.userProfile.avatarUrl || generateAvatarUrl(state.activeKey || 'default')}" class="w-8 h-8 rounded-full bg-gray-700">
+                    <span id="sidebar-nickname" class="font-semibold text-sm">${state.isAdmin ? 'Admin' : (state.userProfile.nickname || 'Usuário')}</span>
+                </button>
+                <button id="logout-btn" class="bg-red-600/20 text-red-300 hover:bg-red-600/40 font-semibold py-2 px-3 rounded-lg transition-all" title="Sair"><i class="fa-solid fa-right-from-bracket"></i></button>`;
+            document.getElementById('logout-btn').onclick = logout;
+            document.getElementById('profile-btn').onclick = () => openModal('profile');
+
+            dom.mainNav.querySelector('[data-type="executors"]').onclick = () => selectItem(null, 'executors');
+        }
+
+        function renderWelcome() {
+            state.activeView = 'welcome';
+            state.selectedItemId = null;
+            updateNavSelection();
+            dom.contentWrapper.innerHTML = `<div class="p-8 h-full flex flex-col items-center justify-center text-center text-gray-500 fade-in"><i class="fa-solid fa-rocket text-5xl mb-4"></i><h2 class="text-3xl font-semibold">Bem-vindo ao Lures Premium</h2><p>Selecione um jogo na barra lateral para ver os scripts.</p></div>`;
+        }
+        
+        function renderScriptsView(game) {
+            dom.contentWrapper.innerHTML = `
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <h2 class="text-3xl font-bold text-white">${game.name}</h2>
+                    <div class="flex gap-4 items-center w-full sm:w-auto">
+                        <div class="relative flex-grow">
+                            <input type="search" id="script-search-bar" placeholder="Pesquisar scripts..." class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 pl-9 pr-3 text-sm focus:ring-1 focus:ring-blue-500 outline-none transition-all">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                        </div>
+                        <div class="admin-only">
+                           <button id="add-script-btn" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105 glow-on-hover">
+                               <i class="fa-solid fa-plus"></i>
+                           </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="script-list" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                </div>
+            `;
+            document.getElementById('script-search-bar').addEventListener('input', handleScriptSearch);
+            if (state.isAdmin) {
+                document.getElementById('add-script-btn').onclick = (e) => openModal('script', null, game.id);
+            }
+            loadScriptsForGame(game.id);
+        }
+
+        function renderExecutorsView() {
+            dom.contentWrapper.innerHTML = `
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-white">Executores</h2>
+                    <div class="admin-only">
+                       <button id="add-executor-btn" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105 glow-on-hover">
+                           <i class="fa-solid fa-plus mr-2"></i>Adicionar Executor
+                       </button>
+                    </div>
+                </div>
+                <div id="executor-list" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                </div>
+            `;
+            if (state.isAdmin) {
+                document.getElementById('add-executor-btn').onclick = () => openModal('executor');
+            }
+            loadExecutors();
+        }
+
+        function loadNavItems(collectionName, elementId, renderFunction, type) {
+            const q = query(collection(db, collectionName), orderBy("order", "asc"));
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                const listElement = document.getElementById(elementId);
+                listElement.innerHTML = '';
+                snapshot.forEach(doc => listElement.appendChild(renderFunction({ id: doc.id, ...doc.data() }, type)));
+            }, error => console.error(`Error loading ${collectionName}:`, error));
+            state.unsubscribeListeners.push(unsubscribe);
+        }
+        
+        function loadScriptsForGame(gameId) {
+            const q = query(collection(db, 'games', gameId, 'scripts'));
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                const listEl = document.getElementById('script-list');
+                if (!listEl) return;
+                listEl.innerHTML = snapshot.empty ? '<p class="text-gray-400 col-span-full">Nenhum script encontrado para este jogo.</p>' : '';
+                snapshot.docs.sort((a,b) => (b.data().featured || false) - (a.data().featured || false)).forEach(doc => {
+                    const scriptData = { id: doc.id, gameId, ...doc.data() };
+                    const card = createScriptCard(scriptData);
+                    listEl.appendChild(card);
+                });
+            }, error => console.error(`Error loading scripts for ${gameId}:`, error));
+            state.unsubscribeListeners.push(unsubscribe);
+        }
+
+        function loadExecutors() {
+            const q = query(collection(db, 'executors'), orderBy("name", "asc"));
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                const listEl = document.getElementById('executor-list');
+                if (!listEl) return;
+                listEl.innerHTML = snapshot.empty ? '<p class="text-gray-400 col-span-full">Nenhum executor encontrado.</p>' : '';
+                snapshot.forEach(doc => listEl.appendChild(createExecutorCard({ id: doc.id, ...doc.data() })));
+            }, error => console.error(`Error loading executors:`, error));
+            state.unsubscribeListeners.push(unsubscribe);
+        }
+
+        function loadKeys() {
+            const q = query(collection(db, 'keys'));
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                dom.keyManager.list.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const keyData = doc.data(); // Pega os dados do documento
+                    const el = document.createElement('div');
+                    el.className = 'bg-gray-800 p-3 rounded-md flex justify-between items-center text-sm';
+                    // CORREÇÃO: Exibe o nome da chave e usa no botão de deletar
+                    el.innerHTML = `
+                        <div>
+                            <span class="font-mono text-gray-300">${doc.id}</span>
+                            <span class="text-gray-500 ml-4">${keyData.name || 'Sem nome'}</span>
+                        </div>
+                        <button class="delete-btn text-red-500 hover:text-red-400" data-id="${doc.id}" data-name="${keyData.name || doc.id}" data-type="key"><i class="fa-solid fa-trash"></i></button>
+                    `;
+                    dom.keyManager.list.appendChild(el);
+                });
+            }, error => {
+                console.error(`Error loading keys:`, error);
+                dom.keyManager.list.innerHTML = `<p class="text-red-400 text-center">Erro ao carregar chaves. Verifique as regras de segurança do Firestore.</p>`;
+            });
+            state.unsubscribeListeners.push(unsubscribe);
+        }
+        
+        function createGameNavListItem(item, type) {
+            const el = document.createElement('div');
+            el.className = `nav-item group flex justify-between items-center px-3 py-2 rounded-md cursor-pointer transition-colors duration-200`;
+            el.dataset.id = item.id;
+            el.dataset.name = item.name;
+            el.dataset.type = type;
+            el.innerHTML = `
+                <span class="truncate font-medium">${item.name}</span>
+                <div class="admin-only items-center opacity-0 group-hover:opacity-100 transition-opacity gap-1">
+                    <button class="edit-btn text-gray-400 hover:text-yellow-400 p-1" data-id="${item.id}" data-name="${item.name}" data-type="${type}"><i class="fa-solid fa-pencil fa-xs"></i></button>
+                    <button class="delete-btn text-gray-400 hover:text-red-400 p-1" data-id="${item.id}" data-name="${item.name}" data-type="${type}"><i class="fa-solid fa-trash fa-xs"></i></button>
+                </div>`;
+            el.onclick = (e) => {
+                if (!e.target.closest('.edit-btn') && !e.target.closest('.delete-btn')) {
+                    selectItem(item, type);
+                }
+            };
+            return el;
+        }
+
+        function createScriptCard(script) {
+            const card = document.createElement('div');
+            card.className = "bg-gray-800/50 border border-gray-700/60 rounded-lg overflow-hidden flex flex-col script-card fade-in";
+            card.dataset.title = script.title;
+            
+            const statusMap = {
+                verificado: { text: 'Verificado', color: 'text-green-400', icon: 'fa-check-circle' },
+                teste: { text: 'Em Teste', color: 'text-yellow-400', icon: 'fa-exclamation-triangle' },
+                obsoleto: { text: 'Obsoleto', color: 'text-red-400', icon: 'fa-times-circle' }
+            };
+            const currentStatus = statusMap[script.status] || statusMap.teste;
+            
+            card.innerHTML = `
+                ${script.imageUrl ? `<img src="${script.imageUrl}" alt="${script.title}" class="script-card-img">` : ''}
+                <div class="p-4 flex flex-col flex-grow">
+                    <h3 class="text-lg font-bold text-white mb-2 flex justify-between items-start">${script.title} ${script.featured ? '<i class="fa-solid fa-star text-yellow-400 text-sm" title="Destaque"></i>' : ''}</h3>
+                    <p class="text-gray-400 text-sm mb-4 flex-grow">${script.description || 'Sem descrição.'}</p>
+                    <div class="flex items-center justify-between mb-4">
+                        <p class="text-xs ${currentStatus.color}"><i class="fa-solid ${currentStatus.icon} mr-1"></i> ${currentStatus.text}</p>
+                        <div class="flex items-center gap-4 text-gray-400 text-sm">
+                            <button class="flex items-center gap-1 comment-btn" data-game-id="${script.gameId}" data-id="${script.id}">
+                                <i class="fa-solid fa-comments"></i>
+                                <span>${script.commentCount || 0}</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 mt-auto">
+                        <button class="copy-btn flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-3 rounded-md text-sm transition-all" data-code="${btoa(unescape(encodeURIComponent(script.code)))}"><i class="fa-solid fa-copy mr-2"></i>Copiar</button>
+                        <div class="admin-only-inline gap-2">
+                           <button class="edit-script-btn bg-yellow-600/80 hover:bg-yellow-600 text-white font-semibold py-2 px-3 rounded-md text-sm transition-all"><i class="fa-solid fa-pencil"></i></button>
+                           <button class="delete-script-btn bg-red-600/80 hover:bg-red-600 text-white font-semibold py-2 px-3 rounded-md text-sm transition-all"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>`;
+
+            if(state.isAdmin){
+                card.querySelector('.edit-script-btn').onclick = () => openModal('script', btoa(JSON.stringify(script)));
+                card.querySelector('.delete-script-btn').onclick = () => handleDelete('script', script.id, script.title, script.gameId);
+            }
+            return card;
+        }
+
+        function createExecutorCard(executor) {
+            const card = document.createElement('div');
+            card.className = "bg-gray-800/50 border border-gray-700/60 rounded-lg overflow-hidden flex flex-col script-card fade-in";
+            
+            const deviceMap = {
+                pc: { text: 'PC', icon: 'fa-desktop' },
+                mobile: { text: 'Mobile', icon: 'fa-mobile-screen-button' },
+                both: { text: 'Ambos', icon: 'fa-laptop-mobile' }
+            };
+            const device = deviceMap[executor.device] || deviceMap.pc;
+
+            card.innerHTML = `
+                ${executor.imageUrl ? `<img src="${executor.imageUrl}" alt="${executor.name}" class="script-card-img">` : ''}
+                <div class="p-4 flex flex-col flex-grow">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-lg font-bold text-white">${executor.name}</h3>
+                        <span class="text-xs text-gray-400 flex items-center gap-2"><i class="fa-solid ${device.icon}"></i> ${device.text}</span>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 flex-grow">${executor.description || 'Sem descrição.'}</p>
+                    <div class="flex gap-2 mt-auto">
+                        <a href="${executor.downloadUrl}" target="_blank" class="flex-1 text-center bg-green-600 hover:bg-green-500 text-white font-semibold py-2 px-3 rounded-md text-sm transition-all"><i class="fa-solid fa-download mr-2"></i>Download</a>
+                        <div class="admin-only-inline gap-2">
+                           <button class="edit-executor-btn bg-yellow-600/80 hover:bg-yellow-600 text-white font-semibold py-2 px-3 rounded-md text-sm transition-all"><i class="fa-solid fa-pencil"></i></button>
+                           <button class="delete-executor-btn bg-red-600/80 hover:bg-red-600 text-white font-semibold py-2 px-3 rounded-md text-sm transition-all"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>`;
+            if(state.isAdmin){
+                card.querySelector('.edit-executor-btn').onclick = () => openModal('executor', btoa(JSON.stringify(executor)));
+                card.querySelector('.delete-executor-btn').onclick = () => handleDelete('executor', executor.id, executor.name);
+            }
+            return card;
+        }
+
+        function renderNavSkeleton(count) { return Array(count).fill('').map(() => `<div class="px-3 py-2 rounded-md bg-gray-700/50 skeleton h-[36px] mb-1"></div>`).join(''); }
+        
+        // --- Manipuladores de Eventos ---
+        function setupEventListeners() {
+            document.querySelectorAll('.cancel-modal-btn').forEach(btn => btn.onclick = () => {
+                btn.closest('.fixed').classList.add('hidden');
+                state.unsubscribeListeners.forEach(unsub => unsub());
+                state.unsubscribeListeners = [];
+            });
+            dom.globalSearchBar.oninput = handleGlobalSearch;
+            dom.homeBtn.onclick = renderWelcome;
+            dom.game.form.onsubmit = handleGameSubmit;
+            dom.executor.form.onsubmit = handleExecutorSubmit;
+            dom.script.form.onsubmit = handleScriptSubmit;
+            dom.keyManager.form.onsubmit = handleGenerateKey;
+            dom.profile.form.onsubmit = handleProfileSubmit;
+            dom.confirm.cancelBtn.onclick = () => dom.confirm.modal.classList.add('hidden');
+            
+            dom.menuToggleBtn.onclick = toggleSidebar;
+            dom.menuCloseBtn.onclick = toggleSidebar;
+            dom.sidebarOverlay.onclick = toggleSidebar;
+
+            document.body.addEventListener('click', e => {
+                const deleteBtn = e.target.closest('.delete-btn');
+                if (deleteBtn) {
+                    e.stopPropagation();
+                    handleDelete(deleteBtn.dataset.type, deleteBtn.dataset.id, deleteBtn.dataset.name, deleteBtn.closest('[data-game-id]')?.dataset.gameId);
+                }
+                const editBtn = e.target.closest('.edit-btn');
+                if (editBtn) {
+                    e.stopPropagation();
+                    openModal(editBtn.dataset.type, { id: editBtn.dataset.id, name: editBtn.dataset.name });
+                }
+                
+                const commentBtn = e.target.closest('.comment-btn');
+                if (commentBtn) openCommentsModal(commentBtn.dataset.gameId, commentBtn.dataset.id);
+
+                const copyBtn = e.target.closest('.copy-btn');
+                if (copyBtn) copyToClipboard(copyBtn, copyBtn.dataset.code);
+
+                const avatarOption = e.target.closest('.avatar-option');
+                if (avatarOption) selectAvatar(avatarOption);
+            });
+        }
+
+        function toggleSidebar() { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); }
+
+        function selectItem(item, type) {
+            state.unsubscribeListeners.forEach(unsub => unsub());
+            state.unsubscribeListeners = [];
+
+            state.selectedItemId = item ? item.id : type + '-tab';
+            state.activeView = type;
+            updateNavSelection();
+            if (type === 'game') renderScriptsView(item);
+            else if (type === 'executors') renderExecutorsView();
+            else if (type === 'welcome') { dom.contentWrapper.innerHTML = `<div class="p-8 h-full flex flex-col items-center justify-center text-center text-gray-500 fade-in"><i class="fa-solid fa-rocket text-5xl mb-4"></i><h2 class="text-3xl font-semibold">Bem-vindo ao Lures Premium</h2><p>Selecione um jogo na barra lateral para ver os scripts.</p></div>`; }
+            if (window.innerWidth < 768) { toggleSidebar(); }
+        }
+
+        function updateNavSelection() { document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.id === state.selectedItemId)); }
+        
+        function handleGlobalSearch(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('#main-nav .nav-item').forEach(item => {
+                const name = item.dataset.name || item.querySelector('span').textContent;
+                item.style.display = name.toLowerCase().includes(searchTerm) ? 'flex' : 'none';
+            });
+        }
+
+        function handleScriptSearch(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('#script-list .script-card').forEach(card => {
+                const title = card.dataset.title || '';
+                card.style.display = title.toLowerCase().includes(searchTerm) ? 'flex' : 'none';
+            });
+        }
+        
+        window.copyToClipboard = (btn, encodedCode) => {
+            try {
+                const code = decodeURIComponent(escape(atob(encodedCode)));
+                navigator.clipboard.writeText(code).then(() => {
+                    const btnText = btn.innerHTML;
+                    btn.innerHTML = 'Copiado!';
+                    btn.classList.add('bg-green-500', 'hover:bg-green-500');
+                    setTimeout(() => {
+                        btn.innerHTML = btnText;
+                        btn.classList.remove('bg-green-500', 'hover:bg-green-500');
+                    }, 2000);
+                });
+            } catch (e) { console.error('Failed to copy', e); alert('Erro ao copiar o script.'); }
+        }
+        
+        window.openModal = (type, data, gameId = null) => {
+            if (type === 'key') { dom.keyManager.modal.classList.remove('hidden'); loadKeys(); return; }
+            if (type === 'profile') { populateProfileModal(); dom.profile.modal.classList.remove('hidden'); return; }
+            if (!dom[type]) return;
+
+            const modal = dom[type].modal;
+            const form = dom[type].form;
+            form.reset();
+
+            if (type === 'script') {
+                const scriptData = data ? JSON.parse(atob(data)) : null;
+                dom.script.modalTitle.textContent = scriptData ? 'Editar Script' : 'Adicionar Script';
+                dom.script.id.value = scriptData?.id || '';
+                dom.script.gameId.value = scriptData?.gameId || gameId;
+                dom.script.title.value = scriptData?.title || '';
+                dom.script.imageUrl.value = scriptData?.imageUrl || '';
+                dom.script.description.value = scriptData?.description || '';
+                dom.script.code.value = scriptData?.code || '';
+                dom.script.status.value = scriptData?.status || 'verificado';
+                dom.script.featured.checked = scriptData?.featured || false;
+            } else { 
+                const itemData = data ? (typeof data === 'string' ? JSON.parse(atob(data)) : data) : null;
+                const typeName = type.charAt(0).toUpperCase() + type.slice(1);
+                dom[type].title.textContent = itemData ? `Editar ${typeName}` : `Adicionar ${typeName}`;
+                dom[type].id.value = itemData?.id || '';
+                if(dom[type].name) dom[type].name.value = itemData?.name || '';
+                if (type === 'executor') {
+                    dom.executor.imageUrl.value = itemData?.imageUrl || '';
+                    dom.executor.description.value = itemData?.description || '';
+                    dom.executor.downloadUrl.value = itemData?.downloadUrl || '';
+                    dom.executor.device.value = itemData?.device || 'pc';
+                }
+            }
+            modal.classList.remove('hidden');
+        }
+
+        // --- Submissão de Forms ---
+        async function handleGameSubmit(e) {
+            e.preventDefault();
+            const id = dom.game.id.value;
+            const name = dom.game.name.value.trim();
+            if (!name) return;
+            const collectionRef = collection(db, 'games');
+            const docData = { name };
+            try {
+                if (id) {
+                    await setDoc(doc(collectionRef, id), docData, { merge: true });
+                } else {
+                    const q = query(collectionRef);
+                    const querySnapshot = await getDocs(q);
+                    docData.order = querySnapshot.size;
+                    await addDoc(collectionRef, docData);
+                }
+                dom.game.modal.classList.add('hidden');
+            } catch (error) { console.error("Error saving game:", error); }
+        }
+
+        async function handleExecutorSubmit(e) {
+            e.preventDefault();
+            const id = dom.executor.id.value;
+            const docData = { name: dom.executor.name.value.trim(), imageUrl: dom.executor.imageUrl.value, description: dom.executor.description.value, downloadUrl: dom.executor.downloadUrl.value, device: dom.executor.device.value };
+            if (!docData.name) return;
+            try {
+                if (id) {
+                    await updateDoc(doc(db, 'executors', id), docData);
+                } else {
+                    await addDoc(collection(db, 'executors'), docData);
+                }
+                dom.executor.modal.classList.add('hidden');
+            } catch (error) { console.error("Error saving executor:", error); }
+        }
+
+        async function handleScriptSubmit(e) {
+            e.preventDefault();
+            const id = dom.script.id.value;
+            const gameId = dom.script.gameId.value;
+            if (!gameId) { alert("Game ID is missing!"); return; }
+            const docData = { title: dom.script.title.value, imageUrl: dom.script.imageUrl.value, description: dom.script.description.value, code: dom.script.code.value, status: dom.script.status.value, featured: dom.script.featured.checked, };
+            try {
+                const scriptCollection = collection(db, 'games', gameId, 'scripts');
+                if (id) {
+                    await updateDoc(doc(scriptCollection, id), docData);
+                } else {
+                    docData.commentCount = 0;
+                    docData.createdAt = serverTimestamp();
+                    await addDoc(scriptCollection, docData);
+                }
+                dom.script.modal.classList.add('hidden');
+            } catch (error) { console.error("Error saving script:", error); }
+        }
+        
+        async function handleGenerateKey(e) {
+            e.preventDefault();
+            const idName = dom.keyManager.idNameInput.value.trim();
+            if (!idName) { alert("Por favor, insira um nome de identificação."); return; }
+            const newKey = 'lures-' + crypto.randomUUID().substring(0, 18);
+            try {
+                await setDoc(doc(db, 'keys', newKey), { name: idName, createdAt: new Date().toISOString() });
+                dom.keyManager.form.reset();
+            } catch (error) { console.error("Error generating key:", error); }
+        }
+        
+        async function handleProfileSubmit(e) {
+            e.preventDefault();
+            if (!state.activeKey || state.isAdmin) return;
+            const nickname = dom.profile.nickname.value.trim();
+            const selectedAvatar = dom.profile.avatarGallery.querySelector('.selected');
+            const avatarUrl = selectedAvatar ? selectedAvatar.dataset.url : state.userProfile.avatarUrl;
+            if (!nickname) { alert("O apelido não pode estar em branco."); return; }
+            try {
+                const profileRef = doc(db, 'profiles', state.activeKey);
+                await setDoc(profileRef, { nickname, avatarUrl }, { merge: true });
+                await loadUserProfile(state.activeKey);
+                updateUIAfterProfileChange();
+                dom.profile.modal.classList.add('hidden');
+            } catch (error) { console.error("Erro ao salvar perfil:", error); alert("Não foi possível salvar seu perfil."); }
+        }
+
+        // --- Ações do Usuário ---
+        window.handleDelete = async (type, id, name, gameId = null) => {
+            let title = `Confirmar Exclusão`;
+            let text = `Tem certeza que deseja excluir "${name}"? Esta ação não pode ser desfeita.`;
+            if (type === 'game') text = `Tem certeza que deseja excluir o jogo "${name}"? TODOS os scripts e seus dados (comentários, etc) serão perdidos permanentemente.`
+            dom.confirm.title.textContent = title;
+            dom.confirm.text.textContent = text;
+            dom.confirm.modal.classList.remove('hidden');
+            dom.confirm.confirmBtn.onclick = async () => {
+                try {
+                    if (type === 'key') await deleteDoc(doc(db, 'keys', id));
+                    if (type === 'executor') await deleteDoc(doc(db, 'executors', id));
+                    if (type === 'script') await deleteDoc(doc(db, 'games', gameId, 'scripts', id));
+                    if (type === 'game') {
+                        const gameDocRef = doc(db, 'games', id);
+                        const batch = writeBatch(db);
+                        const scriptsSnapshot = await getDocs(collection(gameDocRef, 'scripts'));
+                        for(const scriptDoc of scriptsSnapshot.docs) {
+                            const commentsSnapshot = await getDocs(collection(scriptDoc.ref, 'comments'));
+                            commentsSnapshot.forEach(commentDoc => batch.delete(commentDoc.ref));
+                            batch.delete(scriptDoc.ref);
+                        }
+                        batch.delete(gameDocRef);
+                        await batch.commit();
+                        if (state.selectedItemId === id) renderWelcome();
+                    }
+                } catch (error) { console.error(`Error deleting ${type}:`, error); } finally { dom.confirm.modal.classList.add('hidden'); }
+            };
+        }
+        
+        async function openCommentsModal(gameId, scriptId) {
+            dom.comments.modal.classList.remove('hidden');
+            dom.comments.form.dataset.gameId = gameId;
+            dom.comments.form.dataset.scriptId = scriptId;
+            const commentsRef = collection(db, 'games', gameId, 'scripts', scriptId, 'comments');
+            const q = query(commentsRef, orderBy('createdAt', 'desc'));
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                dom.comments.list.innerHTML = snapshot.empty ? '<p class="text-gray-500 text-center">Nenhum comentário ainda. Seja o primeiro!</p>' : '';
+                snapshot.forEach(doc => {
+                    const comment = doc.data();
+                    const commentEl = document.createElement('div');
+                    commentEl.className = 'flex items-start gap-3 bg-gray-800 p-3 rounded-lg';
+                    commentEl.innerHTML = `
+                        <img src="${comment.userAvatar || generateAvatarUrl(comment.userKey)}" class="w-10 h-10 rounded-full bg-gray-700 mt-1">
+                        <div class="flex-grow">
+                            <div class="flex justify-between items-start">
+                                <p class="font-semibold text-blue-400">${comment.userNickname || 'Usuário'}</p>
+                                ${state.isAdmin ? `<button class="delete-comment-btn text-gray-500 hover:text-red-400" data-comment-id="${doc.id}"><i class="fas fa-trash fa-xs"></i></button>` : ''}
+                            </div>
+                            <p class="text-gray-300 text-sm">${comment.text}</p>
+                            <p class="text-xs text-gray-500 mt-2">${new Date(comment.createdAt?.toDate()).toLocaleString()}</p>
+                        </div>`;
+                    dom.comments.list.appendChild(commentEl);
+                });
+            });
+            state.unsubscribeListeners.push(unsubscribe);
+        }
+
+        dom.comments.form.onsubmit = async (e) => {
+            e.preventDefault();
+            const { gameId, scriptId } = e.currentTarget.dataset;
+            const text = dom.comments.input.value.trim();
+            if(!text) return;
+            const scriptRef = doc(db, 'games', gameId, 'scripts', scriptId);
+            const commentsRef = collection(scriptRef, 'comments');
+            try {
+                await addDoc(commentsRef, { text, userKey: state.activeKey, userNickname: state.userProfile.nickname, userAvatar: state.userProfile.avatarUrl, createdAt: serverTimestamp() });
+                await updateDoc(scriptRef, { commentCount: increment(1) });
+                dom.comments.form.reset();
+            } catch (error) { console.error("Error submitting comment:", error); }
+        };
+        
+        dom.comments.list.addEventListener('click', async (e) => {
+            const deleteBtn = e.target.closest('.delete-comment-btn');
+            if(deleteBtn && state.isAdmin) {
+                const { gameId, scriptId } = dom.comments.form.dataset;
+                const { commentId } = deleteBtn.dataset;
+                dom.confirm.title.textContent = "Excluir Comentário";
+                dom.confirm.text.textContent = "Tem certeza que deseja apagar este comentário?";
+                dom.confirm.modal.classList.remove('hidden');
+                dom.confirm.confirmBtn.onclick = async () => {
+                    try {
+                        await deleteDoc(doc(db, 'games', gameId, 'scripts', scriptId, 'comments', commentId));
+                        await updateDoc(doc(db, 'games', gameId, 'scripts', scriptId), { commentCount: increment(-1) });
+                    } catch (error) { console.error("Error deleting comment:", error); } finally { dom.confirm.modal.classList.add('hidden'); }
+                }
+            }
+        });
+
+        // --- Sistema de Perfil e Animações ---
+        function setupLoginAnimations() {
+            const title = "Lures Scripts Premium";
+            dom.loginTitleContainer.innerHTML = title.split('').map((char, i) => 
+                `<span class="login-title-char" style="animation-delay: ${i * 0.05}s">${char === ' ' ? '&nbsp;' : char}</span>`
+            ).join('');
+            
+            if (state.ledInterval) clearInterval(state.ledInterval);
+
+            const words = [
+                { text: "Experiência Otimizada", color: "text-blue-400" },
+                { text: "Melhores Scripts", color: "text-green-400" },
+                { text: "Selecionado para Você", color: "text-yellow-400" },
+                { text: "Acesso Premium", color: "text-purple-400" },
+                { text: "Comunidade Ativa", color: "text-red-400" }
+            ];
+            let currentWordIndex = 0;
+
+            function cycleWords() {
+                const currentWordEl = dom.ledPanel.querySelector('.led-word');
+                if (currentWordEl) {
+                    currentWordEl.classList.remove('visible');
+                }
+
+                setTimeout(() => {
+                    currentWordIndex = (currentWordIndex + 1) % words.length;
+                    const newWord = words[currentWordIndex];
+                    dom.ledPanel.innerHTML = `<span class="led-word ${newWord.color}">${newWord.text}</span>`;
+                    setTimeout(() => {
+                         const newWordEl = dom.ledPanel.querySelector('.led-word');
+                         if(newWordEl) newWordEl.classList.add('visible');
+                    }, 50);
+                }, 500); // Time for fade out
+            }
+            
+            cycleWords(); // Initial call
+            state.ledInterval = setInterval(cycleWords, 3000); // Change word every 3 seconds
+        }
+
+        function generateAvatarUrl(seed, index = 0) {
+            const colors = ['00ffff', 'ff00ff', 'ffff00', '00ff00', 'ff0000', 'ffffff', 'ff8800', '8800ff'];
+            const bgColor = '0d1117';
+            const text = (seed ? seed[0] : 'U').toUpperCase();
+            const color = colors[index % colors.length];
+            return `https://placehold.co/100x100/${bgColor}/${color}?text=${text}&font=inter`;
+        }
+        
+        function populateProfileModal() {
+            dom.profile.nickname.value = state.userProfile.nickname || '';
+            dom.profile.avatarPreview.src = state.userProfile.avatarUrl || generateAvatarUrl(state.activeKey);
+            const gallery = dom.profile.avatarGallery;
+            gallery.innerHTML = '';
+            for (let i = 0; i < 16; i++) {
+                const avatarUrl = generateAvatarUrl(state.activeKey, i);
+                const img = document.createElement('img');
+                img.src = avatarUrl;
+                img.dataset.url = avatarUrl;
+                img.className = `w-16 h-16 rounded-full avatar-option ${avatarUrl === state.userProfile.avatarUrl ? 'selected' : ''}`;
+                gallery.appendChild(img);
+            }
+        }
+
+        function selectAvatar(avatarElement) {
+            dom.profile.avatarGallery.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+            avatarElement.classList.add('selected');
+            dom.profile.avatarPreview.src = avatarElement.dataset.url;
+        }
+
+        async function loadUserProfile(key) {
+            if (state.isAdmin || !key) { state.userProfile = { nickname: 'Admin', avatarUrl: generateAvatarUrl('A') }; return; };
+            const profileRef = doc(db, 'profiles', key);
+            const profileSnap = await getDoc(profileRef);
+            if (profileSnap.exists()) {
+                state.userProfile = profileSnap.data();
+            } else {
+                const defaultProfile = { nickname: `User-${key.substring(6, 11)}`, avatarUrl: generateAvatarUrl(key, 0) };
+                await setDoc(profileRef, defaultProfile);
+                state.userProfile = defaultProfile;
+            }
+        }
+        
+        function updateUIAfterProfileChange() {
+            if (state.isAdmin) return;
+            document.getElementById('sidebar-avatar').src = state.userProfile.avatarUrl;
+            document.getElementById('sidebar-nickname').textContent = state.userProfile.nickname;
+        }
+
+        // --- Funções Auxiliares ---
+        function toggleOrderMode(type) {
+            const listElement = document.getElementById(`${type}-list`);
+            const orderControls = dom.adminPanel.querySelector('#order-controls');
+            if (state.sortableInstances[type]) {
+                state.sortableInstances[type].destroy();
+                state.sortableInstances[type] = null;
+                orderControls.classList.add('hidden');
+                listElement.classList.remove('border-2', 'border-dashed', 'border-blue-500', 'p-2');
+            } else {
+                orderControls.classList.remove('hidden');
+                listElement.classList.add('border-2', 'border-dashed', 'border-blue-500', 'p-2');
+                state.sortableInstances[type] = new Sortable(listElement, { animation: 150, ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen' });
+                dom.adminPanel.querySelector('#save-order').onclick = () => saveOrder(type, listElement);
+                dom.adminPanel.querySelector('#cancel-order').onclick = () => { toggleOrderMode(type); renderSidebar(); };
+            }
+        }
+        
+        async function saveOrder(type, listElement) {
+            const collectionName = type === 'game' ? 'games' : 'executors';
+            const batch = writeBatch(db);
+            listElement.querySelectorAll('.nav-item').forEach((item, index) => {
+                batch.update(doc(db, collectionName, item.dataset.id), { order: index });
+            });
+            try { await batch.commit(); } catch(e) { console.error("Failed to save order", e); } finally { toggleOrderMode(type); }
+        }
+
+        // --- Inicialização ---
+        init();
+    </script>
+</body>
+</html>
